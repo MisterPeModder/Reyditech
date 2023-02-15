@@ -3,4 +3,5 @@
     <string name="loginButtonDescription">Login</string>
     <string name="loginButton">Login to Reddit</string>
     <string name="appLogo">Logo</string>
+    <string name="loginFailed">Login failed or declined, please try again</string>
 </resources>

@@ -11,12 +11,36 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Reyditech"
         tools:targetApi="31">
+
+        <!-- The entry point of the application -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- Intercept URIs starting with "eu.epitech.reyditech" and send them to AppAuth for processing -->
+        <activity
+            android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            android:autoVerify="true"
+            android:exported="true"
+            tools:node="replace">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="oauth2" />
+                <data android:scheme="eu.epitech.reyditech" />
             </intent-filter>
         </activity>
     </application>
