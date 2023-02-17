@@ -1,4 +1,4 @@
-package eu.epitech.reyditech.pages
+package eu.epitech.reyditech.screens
 
 import android.net.Uri
 import android.util.Log
@@ -16,8 +16,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import eu.epitech.reyditech.OAuth2Authorize
 import eu.epitech.reyditech.PACKAGE_NAME
 import eu.epitech.reyditech.R
-import eu.epitech.reyditech.Theme
 
+@Suppress("SpellCheckingInspection")
 private val redditAuthorizationParams = OAuth2Authorize.Params(
     baseUrl = "https://www.reddit.com",
     clientId = "2nmE_0gxmqhtjkGbnWu0FQ",
@@ -26,13 +26,18 @@ private val redditAuthorizationParams = OAuth2Authorize.Params(
     scope = "account edit flair history identity mysubreddits read save",
 )
 
+/**
+ * @param onLoginCompleted Called when the user successfully logs in to navigate to the next screen.
+ */
 @Preview
 @Composable
-internal fun LoginPage() {
+internal fun LoginScreen(
+    onLoginCompleted: () -> Unit = { }
+) {
     var loginFailed by remember { mutableStateOf(false) }
     val authorizer = rememberLauncherForActivityResult(OAuth2Authorize()) { result ->
         result.onSuccess {
-            Log.i("LoginPage", "Login success")
+            onLoginCompleted()
             loginFailed = false
         }.onFailure {
             Log.e("LoginPage", "Login failed", it)
@@ -40,29 +45,27 @@ internal fun LoginPage() {
         }
     }
 
-    Theme {
-        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Filled.LockOpen,
+                contentDescription = stringResource(R.string.appLogo),
+                modifier = Modifier.fillMaxSize(0.5f),
+                tint = MaterialTheme.colors.secondary,
+            )
+            Button(onClick = { authorizer.launch(redditAuthorizationParams) }) {
                 Icon(
-                    Icons.Filled.LockOpen,
-                    contentDescription = stringResource(R.string.appLogo),
-                    modifier = Modifier.fillMaxSize(0.5f),
-                    tint = MaterialTheme.colors.secondary,
+                    Icons.Filled.Login,
+                    contentDescription = stringResource(R.string.loginButtonDescription),
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
-                Button(onClick = { authorizer.launch(redditAuthorizationParams) }) {
-                    Icon(
-                        Icons.Filled.Login,
-                        contentDescription = stringResource(R.string.loginButtonDescription),
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
-                    )
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(stringResource(R.string.loginButton))
-                }
-                if (loginFailed) {
-                    Text(
-                        stringResource(R.string.loginFailed), color = MaterialTheme.colors.error
-                    )
-                }
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text(stringResource(R.string.loginButton))
+            }
+            if (loginFailed) {
+                Text(
+                    stringResource(R.string.loginFailed), color = MaterialTheme.colors.error
+                )
             }
         }
     }
