@@ -1,6 +1,5 @@
 package eu.epitech.reyditech
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,18 +16,9 @@ internal const val PACKAGE_NAME: String = "eu.epitech.reyditech"
 internal fun Reyditech() {
     val navController = rememberNavController()
 
-    Theme {
-        NavHost(navController = navController, startDestination = "login") {
-            composable("login") {
-                LoginScreen(
-                    onLoginCompleted = {
-                        Log.i(
-                            "Reyditech",
-                            "Login succeeded, *not* navigating to next screen"
-                        )
-                    }
-                )
-            }
+    NavHost(navController = navController, startDestination = "login") {
+        composable("login") {
+            LoginScreen()
         }
     }
 }
