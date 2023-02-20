@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import eu.epitech.reyditech.screens.LoginScreen
 
 internal const val PACKAGE_NAME: String = "eu.epitech.reyditech"
+internal const val USER_AGENT: String = "android:eu.epitech.reyditech:v1.0.0 (by /u/MisterPeModder)"
 
 /**
  * The root component of Reyditech.
