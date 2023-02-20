@@ -2,6 +2,7 @@ package eu.epitech.reyditech.viewmodels
 
 import android.app.Application
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
@@ -13,6 +14,7 @@ import eu.epitech.reyditech.Repository
 import eu.epitech.reyditech.USER_AGENT
 import eu.epitech.reyditech.auth.UserAgentBasicAuthentication
 import eu.epitech.reyditech.auth.performTokenRequest
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import net.openid.appauth.*
@@ -22,45 +24,52 @@ import net.openid.appauth.*
  *
  * Provides access to the current login stage and handles authorization requests.
  */
-internal class LoginViewModel private constructor(
-    private val savedState: SavedStateHandle, application: Application
-) : AndroidViewModel(application) {
+internal interface LoginViewModel {
 
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val savedState = createSavedStateHandle()
-                val application = this[APPLICATION_KEY] as Application
-                LoginViewModel(savedState, application)
-            }
-        }
+    @VisibleForTesting(VisibleForTesting.PACKAGE_PRIVATE)
+    val logic: LoginViewModelLogic
 
-        /**
-         * The value of [Repository.loadLoginStage] is to avoid unnecessary disk reads.
-         * The cache is restored automatically on system-initiated process death and screen rotates, among others.
-         */
-        private const val CACHED_LOGIN_STAGE_KEY = "cached_login_stage"
+    val loginStage: StateFlow<LoginStage>
+        get() = logic.loginStage
 
-        private const val WAS_INITIALIZED_KEY = "was_initialized"
-    }
+    /**
+     * Processes the result of an OAuth2 authorization request, then attempts to login.
+     * @see [eu.epitech.reyditech.auth.OAuth2Authorize]
+     */
+    suspend fun authorize(authResponse: Result<AuthorizationResponse>) =
+        logic.authorize(authResponse)
 
-    private val wasInitialized = savedState.getStateFlow(WAS_INITIALIZED_KEY, false)
+    suspend fun login() = logic.login()
 
-    private val repository: Repository
-        get() = Repository(getApplication<Application>())
+    suspend fun logout() = logic.logout()
 
-    private val authService: AuthorizationService
-        get() = AuthorizationService(getApplication<Application>().applicationContext)
+    suspend fun revokeAuthorization() = logic.revokeAuthorization()
 
+    /**
+     * Performs an authenticated request to the Reddit API.
+     */
+    suspend fun <R> request(method: suspend RedditApiService.() -> R): R? = logic.request(method)
+}
 
-    val loginStage: StateFlow<LoginStage> =
-        savedState.getStateFlow(CACHED_LOGIN_STAGE_KEY, LoginStage.Unauthorized)
+@VisibleForTesting(VisibleForTesting.PACKAGE_PRIVATE)
+internal abstract class LoginViewModelLogic {
+
+    protected abstract val wasInitialized: StateFlow<Boolean>
+
+    protected abstract val repository: Repository
+
+    protected abstract val authService: AuthorizationService
+
+    abstract val loginStage: StateFlow<LoginStage>
+
+    protected abstract val scope: CoroutineScope
 
     /** Reddit API instance cache. */
     private lateinit var redditApi: RedditApi
 
     init {
-        viewModelScope.launch { restoreStateFromDisk() }
+        @Suppress("LeakingThis")
+        scope.launch { restoreStateFromDisk() }
     }
 
     /**
@@ -131,8 +140,10 @@ internal class LoginViewModel private constructor(
     private suspend fun updateLoginStage(stage: LoginStage) {
         Log.d("LoginViewModel", "Switching login stage ${loginStage.value} -> $stage")
         repository.storeLoginStage(stage)
-        savedState[CACHED_LOGIN_STAGE_KEY] = stage
+        cacheLoginStage(stage)
     }
+
+    protected abstract fun cacheLoginStage(stage: LoginStage)
 
     private suspend fun ensureAuthorized(): LoginStage.Authorized? {
         return when (val stage = loginStage.value) {
@@ -168,8 +179,47 @@ internal class LoginViewModel private constructor(
                 is LoginStage.AuthorizationFailed -> value.cleared()
                 else -> value
             }
-            savedState[CACHED_LOGIN_STAGE_KEY] = stage
+            cacheLoginStage(stage)
             Log.i("LoginViewModel", "Successfully loaded login stage $stage from disk.")
+        }
+    }
+}
+
+internal class AndroidLoginViewModel(
+    private val savedState: SavedStateHandle, application: Application
+) : AndroidViewModel(application), LoginViewModel {
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val savedState = createSavedStateHandle()
+                val application = this[APPLICATION_KEY] as Application
+                AndroidLoginViewModel(savedState, application)
+            }
+        }
+
+        /**
+         * The value of [Repository.loadLoginStage] is to avoid unnecessary disk reads.
+         * The cache is restored automatically on system-initiated process death and screen rotates, among others.
+         */
+        private const val CACHED_LOGIN_STAGE_KEY = "cached_login_stage"
+
+        private const val WAS_INITIALIZED_KEY = "was_initialized"
+    }
+
+    override val logic = object : LoginViewModelLogic() {
+        override val wasInitialized: StateFlow<Boolean>
+            get() = savedState.getStateFlow(WAS_INITIALIZED_KEY, false)
+        override val repository: Repository
+            get() = Repository(getApplication<Application>())
+        override val authService: AuthorizationService
+            get() = AuthorizationService(getApplication<Application>().applicationContext)
+        override val loginStage: StateFlow<LoginStage> =
+            savedState.getStateFlow(CACHED_LOGIN_STAGE_KEY, LoginStage.Unauthorized)
+        override val scope: CoroutineScope
+            get() = viewModelScope
+
+        override fun cacheLoginStage(stage: LoginStage) {
+            savedState[CACHED_LOGIN_STAGE_KEY] = stage
         }
     }
 }
