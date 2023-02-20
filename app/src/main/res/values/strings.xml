@@ -6,4 +6,5 @@
     <string name="loginFailed">Login failed or declined, please try again</string>
     <string name="logoutButtonDescription">Log out</string>
     <string name="logoutButton">Log out</string>
+    <string name="authorizationFailed">Authorization failed or declined, please try again</string>
 </resources>

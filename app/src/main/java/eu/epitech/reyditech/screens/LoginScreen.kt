@@ -1,7 +1,6 @@
 package eu.epitech.reyditech.screens
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -33,15 +32,19 @@ private val redditAuthorizationParams = OAuth2Authorize.Params(
 
 @Composable
 internal fun LoginScreen(
-    loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory)
+    loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
+    onLoginFinished: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val loginStage = loginViewModel.loginStage.collectAsState(LoginStage.Unauthorized)
     val authorizer = rememberLauncherForActivityResult(OAuth2Authorize()) { result ->
-        scope.launch {
-            loginViewModel.authorize(result)
-            val response = loginViewModel.request { me() }
-            Log.i("LoginScreen", "/api/v1/me: $response")
+        scope.launch { loginViewModel.authorize(result) }
+    }
+
+    // Skip the login page if the user is already logged in.
+    LaunchedEffect(loginStage.value) {
+        if (loginStage.value is LoginStage.LoggedIn) {
+            onLoginFinished()
         }
     }
 
@@ -52,14 +55,9 @@ internal fun LoginScreen(
                 is LoginStage.Unauthorized, is LoginStage.AuthorizationFailed -> authorizer.launch(
                     redditAuthorizationParams
                 )
-                else -> scope.launch {
-                    loginViewModel.login()
-                    val response = loginViewModel.request { me() }
-                    Log.i("LoginScreen", "/api/v1/me: $response")
-                }
+                else -> scope.launch { loginViewModel.login() }
             }
         },
-        onLogout = { scope.launch { loginViewModel.logout() } },
         onRevokeAuthorization = { scope.launch { loginViewModel.revokeAuthorization() } },
     )
 }
@@ -69,7 +67,6 @@ internal fun LoginScreen(
 private fun LoginScreenUI(
     stage: LoginStage = LoginStage.Unauthorized,
     onLogin: () -> Unit = {},
-    onLogout: () -> Unit = {},
     onRevokeAuthorization: () -> Unit = {},
 ) {
     Theme {
@@ -81,26 +78,14 @@ private fun LoginScreenUI(
                     modifier = Modifier.fillMaxSize(0.5f),
                     tint = MaterialTheme.colors.secondary,
                 )
-                if (stage !is LoginStage.LoggedIn) {
-                    Button(onClick = onLogin) {
-                        Icon(
-                            Icons.Filled.Login,
-                            contentDescription = stringResource(R.string.loginButtonDescription),
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(stringResource(R.string.loginButton))
-                    }
-                } else {
-                    Button(onClick = onLogout) {
-                        Icon(
-                            Icons.Filled.Logout,
-                            contentDescription = stringResource(R.string.logoutButtonDescription),
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(stringResource(R.string.logoutButton))
-                    }
+                Button(onClick = onLogin) {
+                    Icon(
+                        Icons.Filled.Login,
+                        contentDescription = stringResource(R.string.loginButtonDescription),
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                    )
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text(stringResource(R.string.loginButton))
                 }
                 if (stage is LoginStage.Authorized || stage is LoginStage.LoginFailed) {
                     Button(onClick = onRevokeAuthorization) {
@@ -114,22 +99,17 @@ private fun LoginScreenUI(
                     }
                 }
                 when (stage) {
-                    is LoginStage.Unauthorized -> Text(
-                        "Not authorized yet", color = MaterialTheme.colors.onBackground
-                    )
-                    is LoginStage.AuthorizationFailed -> Text(
-                        "Authorization failed or declined, please try again",
-                        color = MaterialTheme.colors.error
-                    )
                     is LoginStage.Authorized -> Text(
                         "Authorized!", color = MaterialTheme.colors.onBackground
                     )
-                    is LoginStage.LoggedIn -> Text(
-                        "Logged in!", color = MaterialTheme.colors.onBackground
+                    is LoginStage.AuthorizationFailed -> Text(
+                        stringResource(R.string.authorizationFailed),
+                        color = MaterialTheme.colors.error
                     )
                     is LoginStage.LoginFailed -> Text(
                         stringResource(R.string.loginFailed), color = MaterialTheme.colors.error
                     )
+                    else -> Unit
                 }
             }
         }
