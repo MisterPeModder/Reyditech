@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import eu.epitech.reyditech.screens.LoginScreen
+import eu.epitech.reyditech.screens.MainScreen
 
 internal const val PACKAGE_NAME: String = "eu.epitech.reyditech"
 internal const val USER_AGENT: String = "android:eu.epitech.reyditech:v1.0.0 (by /u/MisterPeModder)"
@@ -19,7 +20,10 @@ internal fun Reyditech() {
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
-            LoginScreen()
+            LoginScreen(onLoginFinished = { navController.navigate("main") })
+        }
+        composable("main") {
+            MainScreen(onReLogin = { navController.navigate("login") })
         }
     }
 }
