@@ -2,7 +2,7 @@ package eu.epitech.reyditech.auth
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
+import androidx.annotation.VisibleForTesting
 import net.openid.appauth.*
 
 /**
@@ -19,7 +19,6 @@ internal sealed class LoginStage(protected val authState: AuthState) : Parcelabl
             val success = authResponse.getOrNull()
             val error = authResponse.exceptionOrNull() as? AuthorizationException
 
-            Log.i("LoginStage", success?.jsonSerializeString() ?: "no success")
             return if (success == null && error == null) {
                 Unauthorized
             } else {
@@ -28,14 +27,18 @@ internal sealed class LoginStage(protected val authState: AuthState) : Parcelabl
         }
     }
 
-    class AuthorizationFailed(authState: AuthState) : LoginStage(authState) {
+    class AuthorizationFailed @VisibleForTesting(VisibleForTesting.PACKAGE_PRIVATE) internal constructor(
+        authState: AuthState
+    ) : LoginStage(authState) {
         /**
          * Clears the failed status and returns to the [Unauthorized] state.
          */
         fun cleared(): LoginStage = Unauthorized
     }
 
-    class Authorized(authState: AuthState) : LoginStage(authState) {
+    class Authorized @VisibleForTesting(VisibleForTesting.PACKAGE_PRIVATE) internal constructor(
+        authState: AuthState
+    ) : LoginStage(authState) {
         fun loggedIn(tokenResponse: TokenResponse): LoginStage =
             fromAuthState(AuthState(authState.lastAuthorizationResponse!!, tokenResponse, null))
 
@@ -46,7 +49,9 @@ internal sealed class LoginStage(protected val authState: AuthState) : Parcelabl
             authState.lastAuthorizationResponse!!.createTokenExchangeRequest()
     }
 
-    class LoggedIn(authState: AuthState) : LoginStage(authState) {
+    class LoggedIn @VisibleForTesting(VisibleForTesting.PACKAGE_PRIVATE) internal constructor(
+        authState: AuthState
+    ) : LoginStage(authState) {
         /**
          * Transitions to the [Authorized] state if the user is still authorized.
          */
@@ -72,7 +77,9 @@ internal sealed class LoginStage(protected val authState: AuthState) : Parcelabl
         }
     }
 
-    class LoginFailed(authState: AuthState) : LoginStage(authState) {
+    class LoginFailed @VisibleForTesting(VisibleForTesting.PACKAGE_PRIVATE) internal constructor(
+        authState: AuthState
+    ) : LoginStage(authState) {
         /**
          * Clears the failed status and attempts to return to the [LoggedIn] state.
          */
