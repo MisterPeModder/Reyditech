@@ -16,6 +16,7 @@ import eu.epitech.reyditech.R
 import eu.epitech.reyditech.Theme
 import eu.epitech.reyditech.auth.LoginStage
 import eu.epitech.reyditech.viewmodels.LoginViewModel
+import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 internal fun MainScreen(
-    loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
+    loginViewModel: LoginViewModel = viewModel<AndroidLoginViewModel>(factory = AndroidLoginViewModel.Factory),
     onReLogin: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()

@@ -2,6 +2,7 @@ package eu.epitech.reyditech.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import eu.epitech.reyditech.R
 import eu.epitech.reyditech.auth.LoginStage
 import eu.epitech.reyditech.auth.OAuth2Authorize
 import eu.epitech.reyditech.viewmodels.LoginViewModel
+import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import kotlinx.coroutines.launch
 
 @Suppress("SpellCheckingInspection")
@@ -32,7 +34,7 @@ private val redditAuthorizationParams = OAuth2Authorize.Params(
 
 @Composable
 internal fun LoginScreen(
-    loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
+    loginViewModel: LoginViewModel = viewModel<AndroidLoginViewModel>(factory = AndroidLoginViewModel.Factory),
     onLoginFinished: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
@@ -64,7 +66,8 @@ internal fun LoginScreen(
 
 @Preview
 @Composable
-private fun LoginScreenUI(
+@VisibleForTesting
+internal fun LoginScreenUI(
     stage: LoginStage = LoginStage.Unauthorized,
     onLogin: () -> Unit = {},
     onRevokeAuthorization: () -> Unit = {},
