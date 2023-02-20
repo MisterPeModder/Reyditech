@@ -22,7 +22,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard/proguard-rules.pro",
+                "proguard/retrofit2.pro",
+            )
         }
     }
     compileOptions {
@@ -87,4 +91,13 @@ dependencies {
 
     // Oauth2 Client
     implementation("net.openid:appauth:0.11.1")
+
+    // Retrofit - HTTP Client
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    // Moshi - JSON Parser
+    implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
+
+    // Retrofit with Moshi Converter
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 }

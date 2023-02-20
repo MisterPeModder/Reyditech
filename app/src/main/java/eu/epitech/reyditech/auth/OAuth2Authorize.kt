@@ -1,4 +1,4 @@
-package eu.epitech.reyditech
+package eu.epitech.reyditech.auth
 
 import android.content.Context
 import android.content.Intent

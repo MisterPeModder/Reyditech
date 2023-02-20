@@ -6,12 +6,16 @@ import androidx.lifecycle.*
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import eu.epitech.reyditech.auth.LoginStage
+import eu.epitech.reyditech.RedditApi
+import eu.epitech.reyditech.RedditApiService
 import eu.epitech.reyditech.Repository
-import kotlinx.coroutines.flow.*
+import eu.epitech.reyditech.USER_AGENT
+import eu.epitech.reyditech.auth.UserAgentBasicAuthentication
+import eu.epitech.reyditech.auth.performTokenRequest
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.*
 
 /**
  * Authentication logic.
@@ -19,79 +23,153 @@ import net.openid.appauth.AuthorizationResponse
  * Provides access to the current login stage and handles authorization requests.
  */
 internal class LoginViewModel private constructor(
-    private val repository: Repository, private val savedState: SavedStateHandle
-) : ViewModel() {
+    private val savedState: SavedStateHandle, application: Application
+) : AndroidViewModel(application) {
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val savedState = createSavedStateHandle()
-                val repository = Repository(this[APPLICATION_KEY] as Application)
-                LoginViewModel(repository, savedState)
+                val application = this[APPLICATION_KEY] as Application
+                LoginViewModel(savedState, application)
             }
         }
 
         /**
-         * The value of [Repository.loadRawAuthState] is to avoid unnecessary disk reads.
+         * The value of [Repository.loadLoginStage] is to avoid unnecessary disk reads.
          * The cache is restored automatically on system-initiated process death and screen rotates, among others.
          */
-        private const val CACHED_AUTH_STATE_KEY = "cached_auth_state"
+        private const val CACHED_LOGIN_STAGE_KEY = "cached_login_stage"
+
+        private const val WAS_INITIALIZED_KEY = "was_initialized"
     }
+
+    private val wasInitialized = savedState.getStateFlow(WAS_INITIALIZED_KEY, false)
+
+    private val repository: Repository
+        get() = Repository(getApplication<Application>())
+
+    private val authService: AuthorizationService
+        get() = AuthorizationService(getApplication<Application>().applicationContext)
+
+
+    val loginStage: StateFlow<LoginStage> =
+        savedState.getStateFlow(CACHED_LOGIN_STAGE_KEY, LoginStage.Unauthorized)
+
+    /** Reddit API instance cache. */
+    private lateinit var redditApi: RedditApi
 
     init {
-        // Update the state cache on startup asynchronously.
-        viewModelScope.launch {
-            Log.i("LoginViewModel", "Loading auth state from disk...")
-            repository.loadRawAuthState().collect { value ->
-                savedState[CACHED_AUTH_STATE_KEY] = value
-                Log.i("LoginViewModel", "Successfully loaded auth state from disk.")
-            }
-        }
+        viewModelScope.launch { restoreStateFromDisk() }
     }
 
     /**
-     * The current authentication state.
-     * Not exposed directly due to its mutable nature.
-     */
-    private val authState: Flow<AuthState> =
-        savedState.getStateFlow(CACHED_AUTH_STATE_KEY, "{}").map {
-            AuthState.jsonDeserialize(it)
-        }
-
-    /**
-     * The current login stage.
-     */
-    val loginStage: StateFlow<LoginStage> = authState.map {
-        when {
-            it.lastAuthorizationResponse != null -> LoginStage.LOGGED_IN
-            it.authorizationException != null -> LoginStage.FAILED
-            else -> LoginStage.UNAUTHORIZED
-        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, LoginStage.UNAUTHORIZED)
-
-    /**
-     * Processes the result of an OAuth2 authorization request.
-     * @see [eu.epitech.reyditech.OAuth2Authorize]
+     * Processes the result of an OAuth2 authorization request, then attempts to login.
+     * @see [eu.epitech.reyditech.auth.OAuth2Authorize]
      */
     suspend fun authorize(authResponse: Result<AuthorizationResponse>) {
         Log.i("LoginViewModel", "Performing authorization...")
-        val newState = AuthState(
-            authResponse.getOrNull(), authResponse.exceptionOrNull() as? AuthorizationException
-        )
-        val newRawState = newState.jsonSerializeString()
-        repository.storeRawAuthState(newRawState)
-        savedState[CACHED_AUTH_STATE_KEY] = newRawState
+        updateLoginStage(LoginStage.Unauthorized.authorized(authResponse))
         Log.i("LoginViewModel", "Successfully authorized")
+        login()
+    }
+
+    suspend fun login() {
+        Log.i("LoginViewModel", "Logging in...")
+        val authorized = ensureAuthorized() ?: return
+
+        updateLoginStage(with(authorized) {
+            try {
+                loggedIn(
+                    authService.performTokenRequest(
+                        createTokenExchangeRequest(), UserAgentBasicAuthentication(
+                            USER_AGENT
+                        )
+                    )
+                ).also {
+                    Log.i("LoginViewModel", "Successfully logged in")
+                }
+            } catch (error: AuthorizationException) {
+                loginFailed(error).also {
+                    Log.e("LoginViewModel", "Failed to log in", error)
+                }
+            }
+        })
     }
 
     suspend fun logout() {
-        Log.i("LoginViewModel", "Logging out")
-        repository.storeRawAuthState("{}")
-        savedState[CACHED_AUTH_STATE_KEY] = "{}"
+        Log.i("LoginViewModel", "Performing logout...")
+        updateLoginStage(
+            when (val oldStage = loginStage.value) {
+                is LoginStage.LoggedIn -> oldStage.loggedOut()
+                is LoginStage.LoginFailed -> oldStage.cleared()
+                else -> return
+            }
+        )
+        Log.i("LoginViewModel", "Successfully logged out")
     }
 
-}
+    suspend fun revokeAuthorization() {
+        updateLoginStage(LoginStage.Unauthorized)
+    }
 
-internal enum class LoginStage {
-    UNAUTHORIZED, LOGGED_IN, FAILED,
+    /**
+     * Performs an authenticated request to the Reddit API.
+     */
+    suspend fun <R> request(method: suspend RedditApiService.() -> R): R? {
+        val stage = ensureLoggedIn() ?: return null
+
+        return stage.performAuthenticatedAction(authService) { accessToken ->
+            // refresh API instance if necessary
+            if (!::redditApi.isInitialized) redditApi = RedditApi(accessToken)
+            else if (redditApi.accessToken != accessToken) redditApi = RedditApi(accessToken)
+
+            redditApi.service.method()
+        }
+    }
+
+    private suspend fun updateLoginStage(stage: LoginStage) {
+        Log.d("LoginViewModel", "Switching login stage ${loginStage.value} -> $stage")
+        repository.storeLoginStage(stage)
+        savedState[CACHED_LOGIN_STAGE_KEY] = stage
+    }
+
+    private suspend fun ensureAuthorized(): LoginStage.Authorized? {
+        return when (val stage = loginStage.value) {
+            is LoginStage.Authorized -> stage
+            is LoginStage.LoginFailed -> {
+                val newStage = stage.cleared()
+                updateLoginStage(newStage)
+                newStage as? LoginStage.Authorized
+            }
+            else -> null
+        }
+    }
+
+    private suspend fun ensureLoggedIn(): LoginStage.LoggedIn? {
+        return when (val stage = loginStage.value) {
+            is LoginStage.LoggedIn -> stage
+            is LoginStage.LoginFailed -> {
+                login()
+                loginStage.value as? LoginStage.LoggedIn
+            }
+            else -> null
+        }
+    }
+
+    private suspend fun restoreStateFromDisk() {
+        if (wasInitialized.value) return
+
+        Log.i("LoginViewModel", "Loading login stage from disk...")
+        repository.loadLoginStage().collect { value ->
+            // clear errors from previous sessions
+            val stage = when (value) {
+                is LoginStage.LoginFailed -> value.cleared()
+                is LoginStage.AuthorizationFailed -> value.cleared()
+                else -> value
+            }
+            savedState[CACHED_LOGIN_STAGE_KEY] = stage
+            Log.i("LoginViewModel", "Successfully loaded login stage $stage from disk.")
+        }
+    }
 }
