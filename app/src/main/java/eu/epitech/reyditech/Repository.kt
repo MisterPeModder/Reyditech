@@ -18,7 +18,15 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  *
  * All operations in this class are asynchronous because they involve disk reads/writes.
  */
-internal class Repository(private val application: Application) {
+internal interface Repository {
+    fun loadLoginStage(): Flow<LoginStage>
+
+    suspend fun storeLoginStage(stage: LoginStage)
+}
+
+internal fun Repository(application: Application): Repository = DataStoreRepository(application)
+
+private class DataStoreRepository(private val application: Application) : Repository {
     private val context: Context
         get() = application.applicationContext
 
@@ -26,10 +34,10 @@ internal class Repository(private val application: Application) {
         private val LOGIN_STAGE_KEY = stringPreferencesKey("login_stage")
     }
 
-    fun loadLoginStage(): Flow<LoginStage> =
+    override fun loadLoginStage(): Flow<LoginStage> =
         context.dataStore.data.map { prefs -> LoginStage.fromJson(prefs[LOGIN_STAGE_KEY]) }
 
-    suspend fun storeLoginStage(stage: LoginStage) {
+    override suspend fun storeLoginStage(stage: LoginStage) {
         context.dataStore.edit { prefs -> prefs[LOGIN_STAGE_KEY] = stage.toJson() }
     }
 }
