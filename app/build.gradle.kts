@@ -44,6 +44,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.2"
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -100,4 +104,7 @@ dependencies {
 
     // Retrofit with Moshi Converter
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+
+    // Mocks the Android SDK for testing
+    testImplementation("org.robolectric:robolectric:4.9")
 }

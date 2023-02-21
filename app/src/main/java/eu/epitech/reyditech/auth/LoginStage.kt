@@ -125,7 +125,7 @@ internal sealed class LoginStage(protected val authState: AuthState) : Parcelabl
                 lastTokenResponse != null -> LoggedIn(authState)
                 lastAuthorizationResponse != null && lastError != null -> LoginFailed(authState)
                 lastAuthorizationResponse != null -> Authorized(authState)
-                lastError == null -> AuthorizationFailed(authState)
+                lastError != null -> AuthorizationFailed(authState)
                 else -> Unauthorized
             }
         }

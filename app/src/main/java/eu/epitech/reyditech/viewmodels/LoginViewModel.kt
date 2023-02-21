@@ -7,11 +7,11 @@ import androidx.lifecycle.*
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import eu.epitech.reyditech.auth.LoginStage
 import eu.epitech.reyditech.RedditApi
 import eu.epitech.reyditech.RedditApiService
 import eu.epitech.reyditech.Repository
 import eu.epitech.reyditech.USER_AGENT
+import eu.epitech.reyditech.auth.LoginStage
 import eu.epitech.reyditech.auth.UserAgentBasicAuthentication
 import eu.epitech.reyditech.auth.performTokenRequest
 import kotlinx.coroutines.CoroutineScope
@@ -36,12 +36,11 @@ internal interface LoginViewModel {
      * Processes the result of an OAuth2 authorization request, then attempts to login.
      * @see [eu.epitech.reyditech.auth.OAuth2Authorize]
      */
-    suspend fun authorize(authResponse: Result<AuthorizationResponse>) =
-        logic.authorize(authResponse)
+    fun authorize(authResponse: Result<AuthorizationResponse>) = logic.authorize(authResponse)
 
-    suspend fun login() = logic.login()
+    fun login() = logic.login()
 
-    suspend fun logout() = logic.logout()
+    fun logout() = logic.logout()
 
     suspend fun revokeAuthorization() = logic.revokeAuthorization()
 
@@ -76,14 +75,20 @@ internal abstract class LoginViewModelLogic {
      * Processes the result of an OAuth2 authorization request, then attempts to login.
      * @see [eu.epitech.reyditech.auth.OAuth2Authorize]
      */
-    suspend fun authorize(authResponse: Result<AuthorizationResponse>) {
+    fun authorize(authResponse: Result<AuthorizationResponse>) =
+        scope.launch { authorizeAsync(authResponse) }
+
+    private suspend fun authorizeAsync(authResponse: Result<AuthorizationResponse>) {
         Log.i("LoginViewModel", "Performing authorization...")
         updateLoginStage(LoginStage.Unauthorized.authorized(authResponse))
         Log.i("LoginViewModel", "Successfully authorized")
-        login()
+        loginAsync()
     }
 
-    suspend fun login() {
+
+    fun login() = scope.launch { loginAsync() }
+
+    private suspend fun loginAsync() {
         Log.i("LoginViewModel", "Logging in...")
         val authorized = ensureAuthorized() ?: return
 
@@ -106,7 +111,9 @@ internal abstract class LoginViewModelLogic {
         })
     }
 
-    suspend fun logout() {
+    fun logout() = scope.launch { logoutAsync() }
+
+    private suspend fun logoutAsync() {
         Log.i("LoginViewModel", "Performing logout...")
         updateLoginStage(
             when (val oldStage = loginStage.value) {
@@ -118,8 +125,8 @@ internal abstract class LoginViewModelLogic {
         Log.i("LoginViewModel", "Successfully logged out")
     }
 
-    suspend fun revokeAuthorization() {
-        updateLoginStage(LoginStage.Unauthorized)
+    fun revokeAuthorization() {
+        scope.launch { updateLoginStage(LoginStage.Unauthorized) }
     }
 
     /**
@@ -145,6 +152,8 @@ internal abstract class LoginViewModelLogic {
 
     protected abstract fun cacheLoginStage(stage: LoginStage)
 
+    protected abstract fun cacheInitialized()
+
     private suspend fun ensureAuthorized(): LoginStage.Authorized? {
         return when (val stage = loginStage.value) {
             is LoginStage.Authorized -> stage
@@ -157,7 +166,7 @@ internal abstract class LoginViewModelLogic {
         }
     }
 
-    private suspend fun ensureLoggedIn(): LoginStage.LoggedIn? {
+    private fun ensureLoggedIn(): LoginStage.LoggedIn? {
         return when (val stage = loginStage.value) {
             is LoginStage.LoggedIn -> stage
             is LoginStage.LoginFailed -> {
@@ -169,10 +178,10 @@ internal abstract class LoginViewModelLogic {
     }
 
     private suspend fun restoreStateFromDisk() {
-        if (wasInitialized.value) return
-
         Log.i("LoginViewModel", "Loading login stage from disk...")
         repository.loadLoginStage().collect { value ->
+            if (wasInitialized.value) return@collect
+
             // clear errors from previous sessions
             val stage = when (value) {
                 is LoginStage.LoginFailed -> value.cleared()
@@ -180,6 +189,7 @@ internal abstract class LoginViewModelLogic {
                 else -> value
             }
             cacheLoginStage(stage)
+            cacheInitialized()
             Log.i("LoginViewModel", "Successfully loaded login stage $stage from disk.")
         }
     }
@@ -220,6 +230,10 @@ internal class AndroidLoginViewModel(
 
         override fun cacheLoginStage(stage: LoginStage) {
             savedState[CACHED_LOGIN_STAGE_KEY] = stage
+        }
+
+        override fun cacheInitialized() {
+            savedState[WAS_INITIALIZED_KEY] = true
         }
     }
 }
