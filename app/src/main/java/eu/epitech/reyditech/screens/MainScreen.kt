@@ -1,5 +1,6 @@
 package eu.epitech.reyditech.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -15,8 +16,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.epitech.reyditech.R
 import eu.epitech.reyditech.Theme
 import eu.epitech.reyditech.auth.LoginStage
-import eu.epitech.reyditech.viewmodels.LoginViewModel
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
+import eu.epitech.reyditech.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -34,7 +35,8 @@ internal fun MainScreen(
     LaunchedEffect(data) {
         if (loginStage.value is LoginStage.LoggedIn && data == null) {
             launch {
-                data = loginViewModel.request { me() }.toString()
+                data = loginViewModel.request { mySubscribedSubreddits(limit = 1) }.toString()
+                Log.i("MainScreen", data ?: "no data")
             }
         }
     }
