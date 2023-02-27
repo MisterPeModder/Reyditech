@@ -8,6 +8,7 @@ import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 /**
  * Links:
@@ -15,8 +16,24 @@ import retrofit2.http.GET
  * - [the Reddit API documentation](https://www.reddit.com/dev/api/oauth)
  */
 internal interface RedditApiService {
-    @GET("api/v1/me")
-    suspend fun me(): Any
+    /**
+     * @param after Only one should be specified.
+     * These indicate the fullName of an item in the listing to use as the anchor point of the slice.
+     * @param before Only one should be specified.
+     * These indicate the fullName of an item in the listing to use as the anchor point of the slice.
+     * @param limit The maximum number of items desired (default: 25, maximum: 100)
+     * @param count The number of items already seen in this listing.
+     * on the html site, the builder uses this to determine when to give values for before and after in the response.
+     * @param show Optional parameter; if "all" is passed, filters such as "hide links that I have voted on" will be disabled.
+     */
+    @GET("/subreddits/mine/subscriber?raw_json=1")
+    suspend fun mySubscribedSubreddits(
+        @Query("after") after: FullName? = null,
+        @Query("before") before: FullName? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("count") count: Int? = null,
+        @Query("show") show: String? = null,
+    ): Listing<Subreddit>
 }
 
 /**
@@ -26,7 +43,10 @@ internal interface RedditApiService {
 internal class RedditApi(val accessToken: String) {
     val service: RedditApiService by lazy {
         val moshi: Moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
+            .add(ThingFactory)
+            .add(Dimensions::class.java, DimensionsAdapter)
+            .add(RedditObjectAdapterFactory)
+            .addLast(KotlinJsonAdapterFactory())
             .build()
 
         val okHttpClient: OkHttpClient = OkHttpClient.Builder()
