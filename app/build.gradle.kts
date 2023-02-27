@@ -9,6 +9,10 @@ android {
     namespace = "eu.epitech.reyditech"
     compileSdk = 33
 
+    testCoverage {
+        jacocoVersion = "0.8.8"
+    }
+
     defaultConfig {
         applicationId = "eu.epitech.reyditech"
         minSdk = 29
@@ -27,6 +31,10 @@ android {
                 "proguard/proguard-rules.pro",
                 "proguard/retrofit2.pro",
             )
+        }
+
+        debug {
+            enableUnitTestCoverage = true
         }
     }
     compileOptions {
