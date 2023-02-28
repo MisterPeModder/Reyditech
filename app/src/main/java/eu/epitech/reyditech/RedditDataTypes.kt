@@ -39,6 +39,9 @@ internal sealed interface Votable : RedditObject {
      * Certain languages such as Java may need to use a boolean wrapper that supports null assignment.
      */
     val likes: Boolean?
+    val score: Int?
+    val hideScore: Boolean?
+    val upvoteRatio: Double?
 }
 
 internal sealed interface Created : RedditObject {
@@ -53,9 +56,9 @@ internal sealed interface Created : RedditObject {
 internal val RedditObjectAdapterFactory: PolymorphicJsonAdapterFactory<RedditObject> =
     PolymorphicJsonAdapterFactory.of(RedditObject::class.java, "kind")
         .withSubtype(Listing::class.java, "Listing")
-        .withSubtype(Account::class.java, "t1")
-        .withSubtype(Link::class.java, "t2")
-        .withSubtype(Message::class.java, "t3")
+        .withSubtype(Comment::class.java, "t1")
+        .withSubtype(Account::class.java, "t2")
+        .withSubtype(Link::class.java, "t3")
         .withSubtype(Message::class.java, "t4")
         .withSubtype(Subreddit::class.java, "t5")
         .withSubtype(Award::class.java, "t6")
@@ -76,6 +79,9 @@ internal data class Listing<out T : RedditObject>(
      * You can reuse the modhash given upon login.
      */
     @Json(name = "modhash") val modhash: String?,
+    /** The number of items in this listing? (not sure at all) */
+    @Json(name = "dist") val dist: Long?,
+    @Json(name = "geo_filter") val geoFilter: String?,
     /** A list of things that this Listing wraps. */
     @Json(name = "children") private val _children: List<@Thing RedditObject>
 ) : RedditObject {
@@ -92,6 +98,10 @@ internal data class Comment(
     @Json(name = "ups") override val ups: Int?,
     @Json(name = "downs") override val downs: Int?,
     @Json(name = "likes") override val likes: Boolean?,
+    /** The net-score of the comment. */
+    @Json(name = "score") override val score: Int?,
+    @Json(name = "hide_score") override val hideScore: Boolean?,
+    @Json(name = "upvote_ratio") override val upvoteRatio: Double?,
     @Json(name = "created") override val created: Long?,
     @Json(name = "created_utc") override val createdUtc: Long?,
     /** Who approved this comment. null if nobody or you are not a mod. */
@@ -145,8 +155,6 @@ internal data class Comment(
     @Json(name = "replies") val replies: Listing<Comment>?,
     /** true if this post is saved by the logged in user. */
     @Json(name = "saved") val saved: Boolean?,
-    /** The net-score of the comment. */
-    @Json(name = "score") val score: Int?,
     /** Whether the comment's score is currently hidden. */
     @Json(name = "score_hidden") val scoreHidden: Boolean?,
     /** Subreddit of thing excluding the /r/ prefix. "pics". */
@@ -212,11 +220,130 @@ internal data class Link(
     @Json(name = "ups") override val ups: Int?,
     @Json(name = "downs") override val downs: Int?,
     @Json(name = "likes") override val likes: Boolean?,
+    @Json(name = "score") override val score: Int?,
+    @Json(name = "hide_score") override val hideScore: Boolean?,
+    @Json(name = "upvote_ratio") override val upvoteRatio: Double?,
     @Json(name = "created") override val created: Long?,
     @Json(name = "created_utc") override val createdUtc: Long?,
+    @Json(name = "all_awardings") val allAwardings: List<Awarding>?,
+    @Json(name = "allow_live_comments") val allowLiveComments: Boolean?,
+    @Json(name = "archived") val archived: Boolean?,
+    @Json(name = "author_flair_richtext") val authorFlairRichtext: List<*>?,
+    @Json(name = "author_flair_type") val authorFlairType: String?,
+    @Json(name = "author_fullname") val authorFullName: String?,
+    @Json(name = "author_is_blocked") val authorIsBlocked: Boolean?,
+    @Json(name = "author_patreon_flair") val authorPatreonFlair: Boolean?,
+    @Json(name = "author_premium") val authorPremium: Boolean?,
+    @Json(name = "author") val author: String?,
+    @Json(name = "awarders") val awarders: List<*>?,
+    @Json(name = "can_gild") val canGild: Boolean?,
+    @Json(name = "can_mod_post") val canModPost: Boolean?,
+    @Json(name = "clicked") val clicked: Boolean?,
+    @Json(name = "contest_mode") val contestMode: Boolean?,
+    @Json(name = "distinguished") val distinguished: String?,
+    @Json(name = "domain") val domain: String?,
+    @Json(name = "edited") val edited: Boolean?,
+    @Json(name = "gilded") val gilded: Int?,
+    @Json(name = "gildings") val gildings: Map<String, Int>?,
+    @Json(name = "hidden") val hidden: Boolean?,
+    @Json(name = "is_created_from_ads_ui") val isCreatedFromAdsUi: Boolean?,
+    @Json(name = "is_crosspostable") val isCrosspostable: Boolean?,
+    @Json(name = "is_meta") val isMeta: Boolean?,
+    @Json(name = "is_orignal_content") val isOriginalContent: Boolean?,
+    @Json(name = "is_reddit_media_domain") val isRedditMediaDomain: Boolean?,
+    @Json(name = "is_robot_indexable") val isRobotIndexable: Boolean?,
+    @Json(name = "is_self") val isSelf: Boolean?,
+    @Json(name = "is_video") val isVideo: Boolean?,
+    @Json(name = "link_flair_background_color") val linkFlairBackgroundColor: String?,
+    @Json(name = "link_flair_css_class") val linkFlairCssClass: String?,
+    @Json(name = "link_flair_richtext") val linkFlairRichtext: List<*>?,
+    @Json(name = "link_flair_template_id") val linkFlairTemplateId: String?,
+    @Json(name = "link_flair_text_color") val linkFlairTextColor: String?,
+    @Json(name = "link_flair_text") val linkFlairText: String?,
+    @Json(name = "link_flair_type") val linkFlairType: String?,
+    @Json(name = "locked") val locked: Boolean?,
+    @Json(name = "media_embed") val mediaEmbed: Map<*, *>?,
+    @Json(name = "media_only") val mediaOnly: Boolean?,
+    @Json(name = "mod_reports") val modReports: List<*>?,
+    @Json(name = "no_follow") val noFollow: Boolean?,
+    @Json(name = "num_comments") val numComments: Int?,
+    @Json(name = "num_crossposts") val numCrossposts: Int?,
+    @Json(name = "over_18") val over18: Boolean?,
+    @Json(name = "parent_whitelist_status") val parentWhitelistStatus: String?,
+    @Json(name = "permalink") val permalink: String?,
+    @Json(name = "pinned") val pinned: Boolean?,
+    @Json(name = "post_hint") val postHint: String?,
+    @Json(name = "preview") val preview: LinkPreview?,
+    @Json(name = "pwls") val pwls: Int?,
+    @Json(name = "quarantine") val quarantine: Boolean?,
+    @Json(name = "saved") val saved: Boolean?,
+    @Json(name = "secure_media_embed") val secureMediaEmbed: Map<*, *>?,
+    @Json(name = "selftext_html") val selfTextHtml: String?,
+    @Json(name = "selftext") val selfText: String?,
+    @Json(name = "send_replies") val sendReplies: Boolean?,
+    @Json(name = "spoiler") val spoiler: Boolean?,
+    @Json(name = "stickied") val stickied: Boolean?,
+    @Json(name = "subreddit_id") val subredditId: String?,
+    @Json(name = "subreddit_name_prefixed") val subredditNamePrefixed: String?,
+    @Json(name = "subreddit_subscribers") val subredditSubscribers: Int?,
+    @Json(name = "subreddit_type") val subredditType: String?,
+    @Json(name = "subreddit_sort") val subredditSort: String?,
+    @Json(name = "subreddit") val subreddit: String?,
+    @Json(name = "thumbnail") val thumbnail: String?,
+    @Json(name = "thumbnail_height") val thumbnailHeight: Int?,
+    @Json(name = "thumbnail_width") val thumbnailWidth: Int?,
+    @Json(name = "title") val title: String?,
+    @Json(name = "total_awards_received") val totalAwardsReceived: Int?,
+    @Json(name = "treatment_tags") val treatmentTags: List<*>?,
+    @Json(name = "url") val url: String?,
+    @Json(name = "url_overriden_by_dest") val urlOverridenByDest: String?,
+    @Json(name = "user_reports") val userReports: List<*>?,
+    @Json(name = "visited") val visited: Boolean?,
+    @Json(name = "whitelist_status") val whitelistStatus: String?,
+    @Json(name = "wls") val wls: Int?,
 ) : RedditObject, Votable, Created {
     override val kind: String = "t3"
 }
+
+internal data class Icon(
+    @Json(name = "height") val height: Int?,
+    @Json(name = "url") val url: String?,
+    @Json(name = "width") val width: Int?,
+)
+
+/** Not to be confused with the [Award] Thing object. */
+internal data class Awarding(
+    @Json(name = "award_sub_type") val awardSubType: String?,
+    @Json(name = "award_type") val awardType: String?,
+    @Json(name = "coin_price") val coinPrice: Int?,
+    @Json(name = "count") val count: Int?,
+    @Json(name = "description") val description: String?,
+    @Json(name = "icon_height") val iconHeight: Int?,
+    @Json(name = "icon_url") val iconUrl: String?,
+    @Json(name = "icon_width") val iconWidth: Int?,
+    @Json(name = "id") val id: String?,
+    @Json(name = "is_enabled") val isEnabled: Boolean?,
+    @Json(name = "is_new") val isNew: Boolean?,
+    @Json(name = "name") val name: String?,
+    @Json(name = "resized_icons") val resizedIcons: List<Icon>?,
+    @Json(name = "resized_static_icons") val resizedStaticIcons: List<Icon>?,
+    @Json(name = "static_icon_height") val staticIconHeight: Int?,
+    @Json(name = "static_icon_url") val staticIconUrl: String?,
+    @Json(name = "static_icon_width") val staticIconWidth: Int?,
+    @Json(name = "subreddit_coin_reward") val subredditCoinReward: Int?,
+)
+
+internal data class LinkPreview(
+    @Json(name = "enabled") val enabled: Boolean?,
+    @Json(name = "images") val images: List<LinkPreviewImage>?,
+)
+
+internal data class LinkPreviewImage(
+    @Json(name = "id") val id: String?,
+    @Json(name = "resolutions") val resolutions: List<Icon>?,
+    @Json(name = "source") val source: Icon?,
+    @Json(name = "variants") val variants: Map<*, *>?,
+)
 
 @Thing
 internal data class Message(

@@ -1,14 +1,18 @@
 package eu.epitech.reyditech
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
+import java.lang.reflect.Type
 
 /**
  * Links:
@@ -34,6 +38,49 @@ internal interface RedditApiService {
         @Query("count") count: Int? = null,
         @Query("show") show: String? = null,
     ): Listing<Subreddit>
+
+    /** The user's posts listing sorted by [type]. */
+    @GET("/{type}?raw_json=1")
+    suspend fun posts(
+        @Path("type") type: PostType,
+        @Query("after") after: FullName? = null,
+        @Query("before") before: FullName? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("count") count: Int? = null,
+        @Query("show") show: String? = null,
+    ): Listing<Comment>
+
+    /** A subreddit's posts listing sorted by [type]. */
+    @GET("/r/{subreddit}/{type}?raw_json=1")
+    suspend fun posts(
+        @Path("subreddit") subreddit: String,
+        @Path("type") type: PostType,
+        @Query("after") after: FullName? = null,
+        @Query("before") before: FullName? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("count") count: Int? = null,
+        @Query("show") show: String? = null,
+    ): Listing<Comment>
+}
+
+internal enum class PostType {
+    @Json(name = "best")
+    BEST,
+
+    @Json(name = "controversial")
+    CONTROVERSIAL,
+
+    @Json(name = "hot")
+    HOT,
+
+    @Json(name = "new")
+    NEW,
+
+    @Json(name = "rising")
+    RISING,
+
+    @Json(name = "top")
+    TOP,
 }
 
 /**
@@ -56,6 +103,7 @@ internal class RedditApi(val accessToken: String) {
         val retrofit: Retrofit = Retrofit.Builder()
             .client(okHttpClient)
             .baseUrl("https://oauth.reddit.com/")
+            .addConverterFactory(EnumConverterFactory)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 
@@ -72,5 +120,22 @@ private class AuthInterceptor(private val accessToken: String) : Interceptor {
             .build()
 
         return chain.proceed(newRequest)
+    }
+}
+
+/** Converts enums to their [Json.name] value. */
+private object EnumConverterFactory : Converter.Factory() {
+    override fun stringConverter(
+        type: Type, annotations: Array<Annotation>, retrofit: Retrofit
+    ): Converter<Enum<*>, String>? = if (type is Class<*> && type.isEnum) {
+        Converter { enum ->
+            try {
+                enum.javaClass.getField(enum.name).getAnnotation(Json::class.java)?.name
+            } catch (exception: Exception) {
+                null
+            } ?: enum.toString()
+        }
+    } else {
+        null
     }
 }
