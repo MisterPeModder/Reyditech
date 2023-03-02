@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.epitech.reyditech.R
-import eu.epitech.reyditech.Theme
 import eu.epitech.reyditech.auth.LoginStage
+import eu.epitech.reyditech.components.Theme
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import eu.epitech.reyditech.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch

@@ -19,6 +19,7 @@ import eu.epitech.reyditech.*
 import eu.epitech.reyditech.R
 import eu.epitech.reyditech.auth.LoginStage
 import eu.epitech.reyditech.auth.OAuth2Authorize
+import eu.epitech.reyditech.components.Theme
 import eu.epitech.reyditech.viewmodels.LoginViewModel
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import kotlinx.coroutines.launch
