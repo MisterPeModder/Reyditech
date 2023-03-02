@@ -92,6 +92,7 @@ internal class RedditApi(val accessToken: String) {
         val moshi: Moshi = Moshi.Builder()
             .add(ThingFactory)
             .add(Dimensions::class.java, DimensionsAdapter)
+            .add(FullName::class.java, FullNameAdapter)
             .add(RedditObjectAdapterFactory)
             .addLast(KotlinJsonAdapterFactory())
             .build()
