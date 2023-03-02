@@ -1,4 +1,4 @@
-package eu.epitech.reyditech
+package eu.epitech.reyditech.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
