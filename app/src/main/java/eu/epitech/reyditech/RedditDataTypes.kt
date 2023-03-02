@@ -6,7 +6,8 @@ import com.squareup.moshi.*
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import java.lang.reflect.Type
 
-internal typealias FullName = String
+@JvmInline
+internal value class FullName(val value: String)
 
 /**
  * The base interface implemented for all Reddit object types.
@@ -569,5 +570,21 @@ internal object ThingFactory : JsonAdapter.Factory {
                 )
             }
         }
+    }
+}
+
+internal object FullNameAdapter : JsonAdapter<FullName>() {
+    override fun fromJson(reader: JsonReader): FullName? {
+        val data = reader.readJsonValue()
+        if (data !is String) return null
+        return FullName(data)
+    }
+
+    override fun toJson(writer: JsonWriter, value: FullName?) {
+        if (value == null) {
+            writer.nullValue()
+            return
+        }
+        writer.value(value.value)
     }
 }

@@ -19,6 +19,7 @@ import eu.epitech.reyditech.components.Theme
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import eu.epitech.reyditech.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
+import net.openid.appauth.AuthorizationException
 
 /**
  * @param onReLogin Called when the user wants to re-login.
@@ -35,8 +36,13 @@ internal fun MainScreen(
     LaunchedEffect(data) {
         if (loginStage.value is LoginStage.LoggedIn && data == null) {
             launch {
-                data = loginViewModel.request { mySubscribedSubreddits(limit = 1) }.toString()
-                Log.i("MainScreen", data ?: "no data")
+                try {
+                    data = loginViewModel.request { mySubscribedSubreddits(limit = 1) }.toString()
+                    Log.i("MainScreen", data ?: "no data")
+                } catch (e: AuthorizationException) {
+                    loginViewModel.logout()
+                    onReLogin()
+                }
             }
         }
     }
