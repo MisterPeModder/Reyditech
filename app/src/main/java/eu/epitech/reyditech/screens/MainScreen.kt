@@ -1,25 +1,29 @@
 package eu.epitech.reyditech.screens
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Verified
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import eu.epitech.reyditech.Link
+import eu.epitech.reyditech.ListingPagingSource
+import eu.epitech.reyditech.PostType
 import eu.epitech.reyditech.R
-import eu.epitech.reyditech.auth.LoginStage
+import eu.epitech.reyditech.components.PostList
 import eu.epitech.reyditech.components.Theme
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import eu.epitech.reyditech.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
-import net.openid.appauth.AuthorizationException
 
 /**
  * @param onReLogin Called when the user wants to re-login.
@@ -30,47 +34,39 @@ internal fun MainScreen(
     onReLogin: () -> Unit = {}, onHome: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
-    val loginStage = loginViewModel.loginStage.collectAsState(LoginStage.Unauthorized)
-    var data: String? by remember { mutableStateOf(null) }
-
-    LaunchedEffect(data) {
-        if (loginStage.value is LoginStage.LoggedIn && data == null) {
-            launch {
-                try {
-                    data = loginViewModel.request { mySubscribedSubreddits(limit = 1) }.toString()
-                    Log.i("MainScreen", data ?: "no data")
-                } catch (e: AuthorizationException) {
-                    loginViewModel.logout()
-                    onReLogin()
+    val postsPager: Pager<ListingPagingSource.Cursor, Link> = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        pagingSourceFactory = {
+            ListingPagingSource { before, after, count, limit ->
+                loginViewModel.request {
+                    posts(
+                        subreddit = "feedthebeast", // only works for MY (Yanis Guaye) subreddits
+                        type = PostType.BEST,
+                        before = before,
+                        after = after,
+                        count = count,
+                        limit = limit
+                    )
                 }
             }
-        }
-    }
+        })
 
-    MainScreenUI(loginStage = loginStage.value, data = data, onLogout = {
+    MainScreenUI(postsPager = postsPager, onLogout = {
         scope.launch {
             loginViewModel.logout()
             onReLogin()
         }
     }, onHome = onHome)
 }
-@Preview
 @Composable
 private fun MainScreenUI(
-    loginStage: LoginStage = LoginStage.Unauthorized,
-    data: String? = null,
+    postsPager: Pager<ListingPagingSource.Cursor, Link>,
     onLogout: () -> Unit = {},
     onHome: () -> Unit = {},
 ) {
     Theme {
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    Icons.Filled.Verified,
-                    contentDescription = stringResource(R.string.appLogo),
-                    modifier = Modifier.fillMaxSize(0.5f),
-                    tint = MaterialTheme.colors.secondary,
-                )
                 Button(onClick = onLogout) {
                     Icon(
                         Icons.Filled.Logout,
@@ -83,13 +79,14 @@ private fun MainScreenUI(
                 Button(onClick = onHome) {
                     Text(stringResource(R.string.home))
                 }
-                if (data != null) {
-                    Text(
-                        text = data,
-                        Modifier.background(MaterialTheme.colors.secondary),
-                        color = MaterialTheme.colors.onSecondary
-                    )
-                }
+//                if (data != null) {
+//                    Text(
+//                        text = data,
+//                        Modifier.background(MaterialTheme.colors.secondary),
+//                        color = MaterialTheme.colors.onSecondary
+//                    )
+//                }
+                PostList(pager = postsPager)
             }
         }
     }
