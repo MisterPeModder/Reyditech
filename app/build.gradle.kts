@@ -116,4 +116,9 @@ dependencies {
 
     // Mocks the Android SDK for testing
     testImplementation("org.robolectric:robolectric:4.9")
+
+    // Dynamic Paging
+    implementation("androidx.paging:paging-runtime:3.1.1")
+    testImplementation("androidx.paging:paging-common:3.1.1")
+    implementation("androidx.paging:paging-compose:1.0.0-alpha18")
 }
