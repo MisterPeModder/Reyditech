@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import eu.epitech.reyditech.screens.HomePage
 import eu.epitech.reyditech.screens.LoginScreen
 import eu.epitech.reyditech.screens.MainScreen
 
@@ -24,6 +25,10 @@ internal fun Reyditech() {
         }
         composable("main") {
             MainScreen(onReLogin = { navController.navigate("login") })
+            MainScreen(onHome = { navController.navigate("home") })
+        }
+        composable("home") {
+            HomePage(onReLogin = { navController.navigate("login") })
         }
     }
 }

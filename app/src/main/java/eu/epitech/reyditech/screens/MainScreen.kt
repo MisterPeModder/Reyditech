@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun MainScreen(
     loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
-    onReLogin: () -> Unit = {},
+    onReLogin: () -> Unit = {}, onHome: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val loginStage = loginViewModel.loginStage.collectAsState(LoginStage.Unauthorized)
@@ -43,15 +43,15 @@ internal fun MainScreen(
             loginViewModel.logout()
             onReLogin()
         }
-    })
+    }, onHome = onHome)
 }
-
 @Preview
 @Composable
 private fun MainScreenUI(
     loginStage: LoginStage = LoginStage.Unauthorized,
     data: String? = null,
     onLogout: () -> Unit = {},
+    onHome: () -> Unit = {},
 ) {
     Theme {
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
@@ -70,6 +70,9 @@ private fun MainScreenUI(
                     )
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text(stringResource(R.string.logoutButton))
+                }
+                Button(onClick = onHome) {
+                    Text(stringResource(R.string.home))
                 }
                 if (data != null) {
                     Text(
