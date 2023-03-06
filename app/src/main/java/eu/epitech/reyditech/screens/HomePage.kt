@@ -1,8 +1,5 @@
 package eu.epitech.reyditech.screens
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -16,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 
 /**
  * @param onReLogin Called when the user wants to re-login.
@@ -23,7 +21,7 @@ import androidx.compose.ui.unit.dp
 @Preview
 @Composable
 internal fun HomePage(
-    loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
+    loginViewModel: LoginViewModel = viewModel(factory = AndroidLoginViewModel.Factory),
     onReLogin: () -> Unit = {},
 ) {
     val loginStage = loginViewModel.loginStage.collectAsState(LoginStage.Unauthorized)
@@ -32,12 +30,12 @@ internal fun HomePage(
     LaunchedEffect(data) {
         if (loginStage.value is LoginStage.LoggedIn && data == null) {
             launch {
-                data = loginViewModel.request { me() }.toString()
+                data = loginViewModel.request { mySubscribedSubreddits() }.toString()
             }
         }
     }
 
-    HomePageUI("robert");
+    HomePageUI("robert")
 }
 
 
@@ -52,3 +50,4 @@ fun HomePageUI(name: String) {
         )
     }
 }
+

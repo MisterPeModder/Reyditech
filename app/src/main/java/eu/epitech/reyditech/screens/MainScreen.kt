@@ -67,14 +67,19 @@ private fun MainScreenUI(
     Theme {
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Button(onClick = onLogout) {
-                    Icon(
-                        Icons.Filled.Logout,
-                        contentDescription = stringResource(R.string.logoutButtonDescription),
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
-                    )
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(stringResource(R.string.logoutButton))
+                Row() {
+                    Button(onClick = onLogout) {
+                        Icon(
+                            Icons.Filled.Logout,
+                            contentDescription = stringResource(R.string.logoutButtonDescription),
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(R.string.logoutButton))
+                    }
+                    Button(onClick = onHome) {
+                        Text(stringResource(R.string.home))
+                    }
                 }
                 Button(onClick = onHome) {
                     Text(stringResource(R.string.home))
@@ -87,6 +92,13 @@ private fun MainScreenUI(
 //                    )
 //                }
                 PostList(pager = postsPager)
+//                if (data != null) {
+//                    Text(
+//                        text = data,
+//                        Modifier.background(MaterialTheme.colors.secondary),
+//                        color = MaterialTheme.colors.onSecondary
+//                    )
+//                }
             }
         }
     }
