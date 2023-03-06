@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -23,17 +24,21 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import eu.epitech.reyditech.Link
 import eu.epitech.reyditech.ListingPagingSource
+import eu.epitech.reyditech.R
 
 
 @Composable
 internal fun PostList(
     pager: Pager<ListingPagingSource.Cursor, Link>,
     onUpvote: (Link) -> Unit = {},
-    onDownvote: (Link) -> Unit = {}
+    onDownvote: (Link) -> Unit = {},
 ) {
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    LazyColumn {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.padding(horizontal = 5.dp)
+    ) {
         this.items(lazyPagingItems) { post ->
             if (post == null) {
                 PostPlaceholder()
@@ -47,16 +52,20 @@ internal fun PostList(
 @Composable
 internal fun Post(post: Link, onUpvote: () -> Unit = {}, onDownvote: () -> Unit = {}) {
     Card(
-        elevation = 1.dp,
+        elevation = 5.dp,
     ) {
-        Row {
+        Row(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier
                     .background(color = MaterialTheme.colors.surface)
                     .padding(5.dp)
             ) {
                 VotingButton(
-                    icon = Icons.Filled.ArrowDropUp, onVote = onUpvote, description = "upvote"
+                    icon = Icons.Filled.ArrowDropUp,
+                    onVote = onUpvote,
+                    description = stringResource(
+                        R.string.upvoteButtonDescription
+                    )
                 )
                 Text(
                     text = post.score?.toString() ?: "·",
@@ -64,7 +73,11 @@ internal fun Post(post: Link, onUpvote: () -> Unit = {}, onDownvote: () -> Unit 
                     fontWeight = FontWeight.Bold,
                 )
                 VotingButton(
-                    icon = Icons.Filled.ArrowDropDown, onVote = onDownvote, description = "downvote"
+                    icon = Icons.Filled.ArrowDropDown,
+                    onVote = onDownvote,
+                    description = stringResource(
+                        R.string.downvoteButtonDescription
+                    )
                 )
             }
             Column(
@@ -72,11 +85,15 @@ internal fun Post(post: Link, onUpvote: () -> Unit = {}, onDownvote: () -> Unit 
                     .background(color = MaterialTheme.colors.surface)
                     .padding(5.dp)
             ) {
-                Text(text = post.title ?: "[No title]", fontWeight = FontWeight.Bold)
+                Text(
+                    text = post.title ?: stringResource(R.string.postTitlePlaceholder),
+                    fontWeight = FontWeight.Bold
+                )
                 if (post.selfText !== null) Text(text = post.selfText)
                 if (post.author !== null) {
                     Text(
-                        text = "By " + post.author, fontStyle = FontStyle.Italic
+                        text = stringResource(R.string.authorUsername, post.author),
+                        fontStyle = FontStyle.Italic
                     )
                 }
             }
