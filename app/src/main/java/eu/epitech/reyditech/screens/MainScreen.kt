@@ -35,12 +35,12 @@ internal fun MainScreen(
 ) {
     val scope = rememberCoroutineScope()
     val postsPager: Pager<ListingPagingSource.Cursor, Link> = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        config = PagingConfig(pageSize = 10, enablePlaceholders = true),
         pagingSourceFactory = {
             ListingPagingSource { before, after, count, limit ->
                 loginViewModel.request {
                     posts(
-                        subreddit = "feedthebeast", // only works for MY (Yanis Guaye) subreddits
+                        subreddit = "askreddit",
                         type = PostType.BEST,
                         before = before,
                         after = after,
