@@ -124,4 +124,12 @@ dependencies {
 
     // Placeholder widgets
     implementation("com.google.accompanist:accompanist-placeholder-material:0.29.1-alpha")
+
+    // Coroutine Image Loader
+    implementation("io.coil-kt:coil-bom:2.2.2")
+    implementation("io.coil-kt:coil")
+    implementation("io.coil-kt:coil-compose")
+    implementation("io.coil-kt:coil-gif")
+    implementation("io.coil-kt:coil-svg")
+    implementation("io.coil-kt:coil-video")
 }

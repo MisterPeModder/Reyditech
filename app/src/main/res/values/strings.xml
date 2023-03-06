@@ -14,4 +14,5 @@
     <string name="postTextPlaceholder">lorem ipsum dolor sit amet, consectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="postsLoadingError">An error occurred while loading the posts</string>
     <string name="refreshButtonDescription">Refresh</string>
+    <string name="postImageDescription">post image</string>
 </resources>
