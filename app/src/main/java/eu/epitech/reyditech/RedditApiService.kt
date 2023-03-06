@@ -122,11 +122,14 @@ internal class ListingPagingSource<T : RedditObject>(private val request: Listin
             val count = params.key?.count ?: 0
             return LoadResult.Page(
                 data = listing.children,
-                prevKey = listing.before?.let { Cursor(it, (count - listing.children.size).coerceAtLeast(0)) },
+                prevKey = listing.before?.let {
+                    Cursor(
+                        it, (count - listing.children.size).coerceAtLeast(0)
+                    )
+                },
                 nextKey = listing.after?.let { Cursor(it, count + listing.children.size) },
                 itemsBefore = count,
-                itemsAfter = listing.after?.let { LoadResult.Page.COUNT_UNDEFINED } ?: 0
-
+                itemsAfter = listing.after?.let { 5 } ?: 0,
             )
         } catch (exception: Exception) {
             return LoadResult.Error(exception)

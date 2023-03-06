@@ -121,4 +121,7 @@ dependencies {
     implementation("androidx.paging:paging-runtime:3.1.1")
     testImplementation("androidx.paging:paging-common:3.1.1")
     implementation("androidx.paging:paging-compose:1.0.0-alpha18")
+
+    // Placeholder widgets
+    implementation("com.google.accompanist:accompanist-placeholder-material:0.29.1-alpha")
 }
