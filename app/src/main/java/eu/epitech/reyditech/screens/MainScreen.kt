@@ -81,24 +81,7 @@ private fun MainScreenUI(
                         Text(stringResource(R.string.hot))
                     }
                 }
-                Button(onClick = onHome) {
-                    Text(stringResource(R.string.home))
-                }
-//                if (data != null) {
-//                    Text(
-//                        text = data,
-//                        Modifier.background(MaterialTheme.colors.secondary),
-//                        color = MaterialTheme.colors.onSecondary
-//                    )
-//                }
                 PostList(pager = postsPager)
-//                if (data != null) {
-//                    Text(
-//                        text = data,
-//                        Modifier.background(MaterialTheme.colors.secondary),
-//                        color = MaterialTheme.colors.onSecondary
-//                    )
-//                }
             }
         }
     }
