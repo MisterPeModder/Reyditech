@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun MainScreen(
     loginViewModel: LoginViewModel = viewModel<AndroidLoginViewModel>(factory = AndroidLoginViewModel.Factory),
-    onReLogin: () -> Unit = {}, onHome: () -> Unit = {},
+    onReLogin: () -> Unit = {}, onHot: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val postsPager: Pager<ListingPagingSource.Cursor, Link> = Pager(
@@ -56,13 +56,13 @@ internal fun MainScreen(
             loginViewModel.logout()
             onReLogin()
         }
-    }, onHome = onHome)
+    }, onHot = onHot)
 }
 @Composable
 private fun MainScreenUI(
     postsPager: Pager<ListingPagingSource.Cursor, Link>,
     onLogout: () -> Unit = {},
-    onHome: () -> Unit = {},
+    onHot: () -> Unit = {},
 ) {
     Theme {
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
@@ -77,8 +77,8 @@ private fun MainScreenUI(
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text(stringResource(R.string.logoutButton))
                     }
-                    Button(onClick = onHome) {
-                        Text(stringResource(R.string.home))
+                    Button(onClick = onHot) {
+                        Text(stringResource(R.string.hot))
                     }
                 }
                 Button(onClick = onHome) {

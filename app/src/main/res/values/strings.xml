@@ -7,6 +7,8 @@
     <string name="logoutButtonDescription">Log out</string>
     <string name="logoutButton">Log out</string>
     <string name="home">Home</string>
+    <string name="hot">Hot</string>
+    <string name="profil">Profil</string>
     <string name="authorizationFailed">Authorization failed or declined, please try again</string>
     <string name="upvoteButtonDescription">upvote</string>
     <string name="downvoteButtonDescription">downvote</string>
