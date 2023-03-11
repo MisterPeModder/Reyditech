@@ -17,16 +17,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +55,7 @@ import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
 import eu.epitech.reyditech.Link
 import eu.epitech.reyditech.R
+import eu.epitech.reyditech.VoteAction
 
 /**
  * @param onGoToSubreddit Called when the user clicks on the subreddit name below the posts, with the subreddit name as parameter.
@@ -60,8 +64,7 @@ import eu.epitech.reyditech.R
 @Composable
 internal fun Post(
     post: Link = Link(),
-    onUpvote: () -> Unit = {},
-    onDownvote: () -> Unit = {},
+    onVote: (action: VoteAction) -> Unit = {},
     onGoToSubreddit: (String) -> Unit = {},
     showSubreddit: Boolean = true,
 ) {
@@ -72,31 +75,7 @@ internal fun Post(
         elevation = 5.dp, modifier = Modifier.fillMaxWidth()
     ) {
         Row {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(5.dp)
-            ) {
-                VotingButton(
-                    icon = Icons.Filled.ArrowDropUp,
-                    onVote = onUpvote,
-                    description = stringResource(
-                        R.string.upvoteButtonDescription
-                    )
-                )
-                Text(
-                    text = post.score?.toString() ?: "·",
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    fontWeight = FontWeight.Bold,
-                )
-                VotingButton(
-                    icon = Icons.Filled.ArrowDropDown,
-                    onVote = onDownvote,
-                    description = stringResource(
-                        R.string.downvoteButtonDescription
-                    )
-                )
-            }
+            PostVotingColumn(post = post, onVote = onVote)
             Column(
                 modifier = Modifier
                     .padding(5.dp)
@@ -113,9 +92,7 @@ internal fun Post(
                 )
                 PostContent(content = contentData)
                 PostBottomRow(
-                    post = post,
-                    onGoToSubreddit = onGoToSubreddit,
-                    showSubreddit = showSubreddit
+                    post = post, onGoToSubreddit = onGoToSubreddit, showSubreddit = showSubreddit
                 )
             }
         }
@@ -123,17 +100,75 @@ internal fun Post(
 }
 
 @Composable
+private fun PostVotingColumn(
+    post: Link = Link(),
+    onVote: (action: VoteAction) -> Unit = {},
+) {
+    var likes: Boolean? by remember { mutableStateOf(post.likes) }
+    val voteOnPost = { action: VoteAction ->
+        onVote(action)
+        likes = when (action) {
+            VoteAction.UPVOTE -> true
+            VoteAction.DOWNVOTE -> false
+            else -> null
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .padding(5.dp)
+    ) {
+        VotingButton(
+            icon = Icons.Filled.ArrowDropUp,
+            voteAction = VoteAction.UPVOTE,
+            onVote = voteOnPost,
+            description = stringResource(
+                R.string.upvoteButtonDescription
+            ),
+            highlighted = likes == true,
+        )
+        Text(
+            text = post.score?.toString() ?: "·",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            fontWeight = FontWeight.Bold,
+            color = if (likes === null) Color.Unspecified else MaterialTheme.colors.primary,
+        )
+        VotingButton(
+            icon = Icons.Filled.ArrowDropDown,
+            voteAction = VoteAction.DOWNVOTE,
+            onVote = voteOnPost,
+            description = stringResource(
+                R.string.downvoteButtonDescription
+            ),
+            highlighted = likes == false,
+        )
+    }
+}
+
+@Composable
 private fun ColumnScope.VotingButton(
-    icon: ImageVector, onVote: () -> Unit = {}, description: String = ""
+    icon: ImageVector,
+    voteAction: VoteAction,
+    onVote: (action: VoteAction) -> Unit,
+    description: String,
+    highlighted: Boolean,
 ) {
     Icon(
         imageVector = icon,
         contentDescription = description,
+        tint = if (highlighted) MaterialTheme.colors.primary else LocalContentColor.current,
         modifier = Modifier
-            .size(ButtonDefaults.IconSize)
+            .size(20.dp)
             .align(Alignment.CenterHorizontally)
             .clickable(
-                role = Role.Button, onClick = onVote
+                role = Role.Button, onClick = {
+                    if (highlighted) {
+                        onVote(VoteAction.UNVOTE)
+                    } else {
+                        onVote(voteAction)
+                    }
+                }
             )
     )
 }
@@ -255,11 +290,9 @@ private fun PostBottomRow(
 ) {
     FlowRow {
         if (showSubreddit && post.subreddit != null) {
-            Text(
-                text = "r/${post.subreddit}",
+            Text(text = "r/${post.subreddit}",
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onGoToSubreddit(post.subreddit) }
-            )
+                modifier = Modifier.clickable { onGoToSubreddit(post.subreddit) })
         }
         if (post.author !== null) {
             Row {
@@ -291,8 +324,7 @@ private fun TextPostPreview() {
                 selfText = stringResource(R.string.postTextPlaceholder),
                 score = 8842,
             ),
-            onUpvote = { Log.i("PostPreview", "upvoted") },
-            onDownvote = { Log.i("PostPreview", "downvoted") },
+            onVote = { Log.i("TextPostPreview", "vote: $it") },
         )
     }
 }
@@ -310,8 +342,7 @@ private fun ImagePostPreview() {
                 url = "https://i.redd.it/4qt57zc0w2na1.jpg",
                 score = 228,
             ),
-            onUpvote = { Log.i("ImagePostPreview", "upvoted") },
-            onDownvote = { Log.i("ImagePostPreview", "downvoted") },
+            onVote = { Log.i("ImagePostPreview", "vote: $it") },
         )
     }
 }

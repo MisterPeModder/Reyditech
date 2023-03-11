@@ -20,9 +20,11 @@ import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import eu.epitech.reyditech.FullName
 import eu.epitech.reyditech.Link
 import eu.epitech.reyditech.ListingPagingSource
 import eu.epitech.reyditech.R
+import eu.epitech.reyditech.VoteAction
 
 
 /**
@@ -32,8 +34,7 @@ import eu.epitech.reyditech.R
 @Composable
 internal fun PostList(
     pager: Pager<ListingPagingSource.Cursor, Link>,
-    onUpvote: (Link) -> Unit = {},
-    onDownvote: (Link) -> Unit = {},
+    onVote: (id: FullName, action: VoteAction) -> Unit = { _, _ -> },
 ) {
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
     val state = lazyPagingItems.loadState
@@ -71,9 +72,11 @@ internal fun PostList(
                 if (post == null) {
                     Post()
                 } else {
-                    Post(post = post,
-                        onUpvote = { onUpvote(post) },
-                        onDownvote = { onDownvote(post) })
+                    Post(post = post, onVote = { action ->
+                        if (post.name != null) {
+                            onVote(post.name, action)
+                        }
+                    })
                 }
             }
         }

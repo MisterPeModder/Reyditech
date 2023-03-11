@@ -74,7 +74,7 @@ internal typealias PostsPager = Pager<ListingPagingSource.Cursor, Link>
  */
 internal fun PostsPager(loginViewModel: LoginViewModel): PostsPager =
     Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = true),
+        config = PagingConfig(pageSize = 10, initialLoadSize = 10, enablePlaceholders = true),
         pagingSourceFactory = {
             ListingPagingSource { before, after, count, limit ->
                 loginViewModel.request {

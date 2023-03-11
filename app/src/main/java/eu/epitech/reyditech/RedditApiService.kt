@@ -1,7 +1,5 @@
 package eu.epitech.reyditech
 
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -11,7 +9,10 @@ import okhttp3.Response
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 import java.lang.reflect.Type
@@ -63,6 +64,19 @@ internal interface RedditApiService {
         @Query("count") count: Int? = null,
         @Query("show") show: String? = null,
     ): Listing<Link>
+
+    /**
+     * Cast a vote on a thing.
+     *
+     * `id` should be the full name of the Link or Comment to vote on.
+     * `action` indicates to direction of the vote.
+     */
+    @FormUrlEncoded
+    @POST("/api/vote")
+    suspend fun vote(
+        @Field("id") id: FullName,
+        @Field("dir") action: VoteAction,
+    )
 }
 
 internal enum class PostType {
@@ -83,6 +97,15 @@ internal enum class PostType {
 
     @Json(name = "top")
     TOP,
+}
+
+@JvmInline
+internal value class VoteAction private constructor(val dir: Int) {
+    companion object {
+        val UPVOTE = VoteAction(1)
+        val UNVOTE = VoteAction(0)
+        val DOWNVOTE = VoteAction(-1)
+    }
 }
 
 @FunctionalInterface
