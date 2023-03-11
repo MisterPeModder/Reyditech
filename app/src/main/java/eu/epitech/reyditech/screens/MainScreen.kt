@@ -13,11 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import eu.epitech.reyditech.Link
-import eu.epitech.reyditech.ListingPagingSource
-import eu.epitech.reyditech.PostType
+import eu.epitech.reyditech.PostsPager
 import eu.epitech.reyditech.R
 import eu.epitech.reyditech.components.PostList
 import eu.epitech.reyditech.components.Theme
@@ -34,21 +30,7 @@ internal fun MainScreen(
     onReLogin: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
-    val postsPager: Pager<ListingPagingSource.Cursor, Link> = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = true),
-        pagingSourceFactory = {
-            ListingPagingSource { before, after, count, limit ->
-                loginViewModel.request {
-                    posts(
-                        type = PostType.BEST,
-                        before = before,
-                        after = after,
-                        count = count,
-                        limit = limit
-                    )
-                }
-            }
-        })
+    val postsPager = PostsPager(loginViewModel)
 
     MainScreenUI(postsPager = postsPager, onLogout = {
         scope.launch {
@@ -60,7 +42,7 @@ internal fun MainScreen(
 
 @Composable
 private fun MainScreenUI(
-    postsPager: Pager<ListingPagingSource.Cursor, Link>,
+    postsPager: PostsPager,
     onLogout: () -> Unit = {},
 ) {
     Theme {
