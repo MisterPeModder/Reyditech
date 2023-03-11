@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.epitech.reyditech.FullName
 import eu.epitech.reyditech.PostsPager
@@ -63,7 +64,7 @@ private fun MainScreenUI(
     onVote: (id: FullName, action: VoteAction) -> Unit,
 ) {
     Theme {
-        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
+        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize().padding(bottom = 60.dp, top = 55.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(onClick = onLogout) {
                     Icon(
