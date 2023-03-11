@@ -30,7 +30,7 @@ private val redditAuthorizationParams = OAuth2Authorize.Params(
     clientId = "2nmE_0gxmqhtjkGbnWu0FQ",
     packageName = "eu.epitech.reyditech",
     redirectUri = Uri.parse("$PACKAGE_NAME://oauth2"),
-    scope = "account edit flair history identity mysubreddits read save",
+    scope = "account edit flair history identity mysubreddits read save vote",
 )
 
 @Composable

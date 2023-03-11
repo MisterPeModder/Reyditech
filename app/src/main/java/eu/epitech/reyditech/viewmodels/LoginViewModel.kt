@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import net.openid.appauth.*
+import java.lang.RuntimeException
 
 /**
  * Authentication logic.
@@ -48,6 +49,17 @@ internal interface LoginViewModel {
      * Performs an authenticated request to the Reddit API.
      */
     suspend fun <R> request(method: suspend RedditApiService.() -> R): R? = logic.request(method)
+
+    /**
+     * Performs an authenticated request to the Reddit API in the given coroutine scope.
+     * If [onError] is not null, the method also catches instances of [RuntimeException] and
+     * passes it to the callback.
+     */
+    fun <R> requestIn(
+        scope: CoroutineScope,
+        onError: ((RuntimeException) -> Unit)? = null,
+        method: suspend RedditApiService.() -> R
+    ) = logic.requestIn(scope, onError, method)
 }
 
 @VisibleForTesting(VisibleForTesting.PACKAGE_PRIVATE)
@@ -67,8 +79,7 @@ internal abstract class LoginViewModelLogic {
     private lateinit var redditApi: RedditApi
 
     init {
-        @Suppress("LeakingThis")
-        scope.launch { restoreStateFromDisk() }
+        @Suppress("LeakingThis") scope.launch { restoreStateFromDisk() }
     }
 
     /**
@@ -144,6 +155,24 @@ internal abstract class LoginViewModelLogic {
         }
     }
 
+    fun <R> requestIn(
+        scope: CoroutineScope,
+        onError: ((RuntimeException) -> Unit)? = null,
+        method: suspend RedditApiService.() -> R
+    ) {
+        scope.launch {
+            try {
+                request(method)
+            } catch (error: RuntimeException) {
+                if (onError === null) {
+                    throw error
+                } else {
+                    onError(error)
+                }
+            }
+        }
+    }
+
     private suspend fun updateLoginStage(stage: LoginStage) {
         Log.d("LoginViewModel", "Switching login stage ${loginStage.value} -> $stage")
         repository.storeLoginStage(stage)
@@ -162,6 +191,7 @@ internal abstract class LoginViewModelLogic {
                 updateLoginStage(newStage)
                 newStage as? LoginStage.Authorized
             }
+
             else -> null
         }
     }
@@ -173,6 +203,7 @@ internal abstract class LoginViewModelLogic {
                 login()
                 loginStage.value as? LoginStage.LoggedIn
             }
+
             else -> null
         }
     }
@@ -220,7 +251,7 @@ internal class AndroidLoginViewModel(
         override val wasInitialized: StateFlow<Boolean>
             get() = savedState.getStateFlow(WAS_INITIALIZED_KEY, false)
         override val repository: Repository
-            get() = Repository(getApplication<Application>())
+            get() = Repository(getApplication())
         override val authService: AuthorizationService
             get() = AuthorizationService(getApplication<Application>().applicationContext)
         override val loginStage: StateFlow<LoginStage> =

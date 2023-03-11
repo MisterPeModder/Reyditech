@@ -1,6 +1,11 @@
 package eu.epitech.reyditech.screens
 
-import androidx.compose.foundation.layout.*
+import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -13,8 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import eu.epitech.reyditech.FullName
 import eu.epitech.reyditech.PostsPager
 import eu.epitech.reyditech.R
+import eu.epitech.reyditech.VoteAction
 import eu.epitech.reyditech.components.PostList
 import eu.epitech.reyditech.components.Theme
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
@@ -37,13 +44,23 @@ internal fun MainScreen(
             loginViewModel.logout()
             onReLogin()
         }
+    }, onVote = { id: FullName, action: VoteAction ->
+        Log.i("MainScreen", "Voting on $id with $action")
+        loginViewModel.requestIn(
+            scope = scope,
+            onError = {
+                Log.e("MainScreen", "Failed to vote on $id with $action", it)
+            },
+            method = { vote(id, action) },
+        )
     })
 }
 
 @Composable
 private fun MainScreenUI(
     postsPager: PostsPager,
-    onLogout: () -> Unit = {},
+    onLogout: () -> Unit,
+    onVote: (id: FullName, action: VoteAction) -> Unit,
 ) {
     Theme {
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
@@ -57,7 +74,7 @@ private fun MainScreenUI(
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text(stringResource(R.string.logoutButton))
                 }
-                PostList(pager = postsPager)
+                PostList(pager = postsPager, onVote = onVote)
             }
         }
     }
