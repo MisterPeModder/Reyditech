@@ -5,8 +5,23 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -38,8 +53,18 @@ import com.google.accompanist.placeholder.material.shimmer
 import eu.epitech.reyditech.Link
 import eu.epitech.reyditech.R
 
+/**
+ * @param onGoToSubreddit Called when the user clicks on the subreddit name below the posts, with the subreddit name as parameter.
+ * @param showSubreddit Whether or not to show the subreddit name below the post.
+ */
 @Composable
-internal fun Post(post: Link = Link(), onUpvote: () -> Unit = {}, onDownvote: () -> Unit = {}) {
+internal fun Post(
+    post: Link = Link(),
+    onUpvote: () -> Unit = {},
+    onDownvote: () -> Unit = {},
+    onGoToSubreddit: (String) -> Unit = {},
+    showSubreddit: Boolean = true,
+) {
     val context = LocalContext.current
     val contentData = remember { post.contentData }
 
@@ -87,12 +112,11 @@ internal fun Post(post: Link = Link(), onUpvote: () -> Unit = {}, onDownvote: ()
                         .padding(PaddingValues(bottom = 5.dp))
                 )
                 PostContent(content = contentData)
-                if (post.author !== null) {
-                    Text(
-                        text = stringResource(R.string.authorUsername, post.author),
-                        fontStyle = FontStyle.Italic
-                    )
-                }
+                PostBottomRow(
+                    post = post,
+                    onGoToSubreddit = onGoToSubreddit,
+                    showSubreddit = showSubreddit
+                )
             }
         }
     }
@@ -220,6 +244,38 @@ private fun PostLink(uri: Uri) {
         modifier = Modifier.padding(vertical = 5.dp),
         color = Color.Blue,
     )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PostBottomRow(
+    post: Link,
+    onGoToSubreddit: (String) -> Unit,
+    showSubreddit: Boolean,
+) {
+    FlowRow {
+        if (showSubreddit && post.subreddit != null) {
+            Text(
+                text = "r/${post.subreddit}",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onGoToSubreddit(post.subreddit) }
+            )
+        }
+        if (post.author !== null) {
+            Row {
+                if (showSubreddit && post.subreddit != null) {
+                    Text(
+                        text = " · ",
+                        color = Color.Gray,
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.authorUsername, post.author),
+                    fontStyle = FontStyle.Italic
+                )
+            }
+        }
+    }
 }
 
 @Preview
