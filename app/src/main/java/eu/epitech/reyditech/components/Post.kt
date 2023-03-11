@@ -38,7 +38,6 @@ import com.google.accompanist.placeholder.material.shimmer
 import eu.epitech.reyditech.Link
 import eu.epitech.reyditech.R
 
-@Preview
 @Composable
 internal fun Post(post: Link = Link(), onUpvote: () -> Unit = {}, onDownvote: () -> Unit = {}) {
     val context = LocalContext.current
@@ -133,7 +132,7 @@ private val Link.contentData: PostContentData
             uri?.lastPathSegment?.endsWith(".jpg") == true -> PostContentData.Image(uri)
             uri?.lastPathSegment?.endsWith(".jpeg") == true -> PostContentData.Image(uri)
             uri?.lastPathSegment?.endsWith(".webp") == true -> PostContentData.Image(uri)
-            uri !== null && (selfText == null || selfText.isBlank()) -> PostContentData.Link(uri)
+            uri !== null && selfText.isNullOrBlank() -> PostContentData.Link(uri)
             else -> PostContentData.Text(selfText ?: "")
         }
 
@@ -154,7 +153,6 @@ private fun Modifier.clickablePost(content: PostContentData, context: Context): 
 
 @Composable
 private fun ColumnScope.PostContent(content: PostContentData) {
-    Text(text = content.javaClass.simpleName)
     when (content) {
         is PostContentData.Text -> PostText(content.textContent)
         is PostContentData.Link -> PostLink(content.uri)
@@ -226,19 +224,38 @@ private fun PostLink(uri: Uri) {
 
 @Preview
 @Composable
-private fun PostPreview() {
+private fun TextPostPreview() {
     Box(
         modifier = Modifier.padding(10.dp)
     ) {
         Post(
             post = Link(
                 title = "Title",
-                author = "/u/the_big_motherhouse",
+                author = "the_big_mother_house",
                 selfText = stringResource(R.string.postTextPlaceholder),
                 score = 8842,
             ),
             onUpvote = { Log.i("PostPreview", "upvoted") },
             onDownvote = { Log.i("PostPreview", "downvoted") },
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ImagePostPreview() {
+    Box(
+        modifier = Modifier.padding(10.dp)
+    ) {
+        Post(
+            post = Link(
+                title = "Title",
+                author = "SomeUser",
+                url = "https://i.redd.it/4qt57zc0w2na1.jpg",
+                score = 228,
+            ),
+            onUpvote = { Log.i("ImagePostPreview", "upvoted") },
+            onDownvote = { Log.i("ImagePostPreview", "downvoted") },
         )
     }
 }
