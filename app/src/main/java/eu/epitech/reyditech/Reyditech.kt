@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -16,13 +15,26 @@ import androidx.navigation.compose.rememberNavController
 import eu.epitech.reyditech.screens.LoginScreen
 import eu.epitech.reyditech.screens.MainScreen
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults.textFieldWithoutLabelPadding
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.time.format.TextStyle
 
 internal const val PACKAGE_NAME: String = "eu.epitech.reyditech"
 internal const val USER_AGENT: String = "android:eu.epitech.reyditech:v1.0.0 (by /u/MisterPeModder)"
@@ -35,15 +47,16 @@ internal const val USER_AGENT: String = "android:eu.epitech.reyditech:v1.0.0 (by
 @Composable
 internal fun Reyditech() {
     val navController = rememberNavController()
+    var searchparam by remember { mutableStateOf(TextFieldValue("")) }
     Scaffold(
         topBar = {
             TopAppBar(
-                backgroundColor = MaterialTheme.colors.primaryVariant,
+//                backgroundColor = MaterialTheme.colors.primaryVariant,
+                backgroundColor = Color(0xFF039BE5),
                 title = {
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-//                            horizontalArrangement = Arrangement.End
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -55,6 +68,28 @@ internal fun Reyditech() {
                             text = "Reyditech"
 
                         )
+                        OutlinedTextField(
+                            modifier = Modifier/*.height(150.dp)*/
+                                .background(Transparent)
+                                .padding(1.dp)
+                                ,
+                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp),
+                            value = searchparam,
+                            onValueChange = {
+                                println(searchparam)
+                                searchparam = it
+                            },
+                            label = { Text(text = "search") },
+                            placeholder = { Text(text = "Search...") },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.search),
+                                    contentDescription = "search",
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier.width(20.dp)
+                                )
+                            },
+                        )
                     }
                 }
             )
@@ -63,7 +98,10 @@ internal fun Reyditech() {
         content = {
         },
         bottomBar = {
-            BottomAppBar(backgroundColor = MaterialTheme.colors.secondaryVariant) {
+            BottomAppBar(
+//                backgroundColor = MaterialTheme.colors.secondaryVariant,
+                backgroundColor = Color(0xFF311B92),
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -74,7 +112,8 @@ internal fun Reyditech() {
                 ) {
                     Button(
                         onClick = { navController.navigate("main") },
-                        Modifier
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Transparent),
+                        modifier = Modifier
                             .width(130.dp)
                             .fillMaxHeight()
                             .padding(0.dp)
@@ -88,7 +127,8 @@ internal fun Reyditech() {
                     }
                     Button(
                         onClick = { println("Profil") /*navController.navigate("hot")*/ },
-                        Modifier
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Transparent),
+                        modifier = Modifier
                             .width(130.dp)
                             .fillMaxHeight()
                             .padding(0.dp)
@@ -102,7 +142,8 @@ internal fun Reyditech() {
                     }
                     Button(
                         onClick = { println("Profil") /* navController.navigate("hot")*/ },
-                        Modifier
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Transparent),
+                        modifier = Modifier
                             .width(130.dp)
                             .fillMaxHeight()
                             .padding(0.dp)
