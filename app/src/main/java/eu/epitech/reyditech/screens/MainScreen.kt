@@ -40,7 +40,6 @@ internal fun MainScreen(
             ListingPagingSource { before, after, count, limit ->
                 loginViewModel.request {
                     posts(
-                        subreddit = "gifs",
                         type = PostType.BEST,
                         before = before,
                         after = after,
