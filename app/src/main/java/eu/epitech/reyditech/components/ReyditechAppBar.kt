@@ -37,11 +37,7 @@ internal fun ReyditechAppBar(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.dark_logo),
-                    contentDescription = stringResource(R.string.appLogo),
-                    tint = Color.Unspecified
-                )
+                AppLogo()
                 Text(text = "Reyditech")
                 if (searchParam != null)
                     SearchField(searchParam, setSearchParam)
