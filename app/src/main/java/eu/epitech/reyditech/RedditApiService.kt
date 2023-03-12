@@ -73,9 +73,27 @@ internal interface RedditApiService {
      */
     @FormUrlEncoded
     @POST("/api/vote")
-    suspend fun vote(
-        @Field("id") id: FullName,
-        @Field("dir") action: VoteAction,
+    suspend fun vote(@Field("id") id: FullName, @Field("dir") action: VoteAction)
+
+    /**
+     * Get information about a subreddit.
+     *
+     * @param subreddit The name of the subreddit.
+     */
+    @GET("/r/{subreddit}/about?raw_json=1")
+    suspend fun aboutSubreddit(@Path("subreddit") subreddit: String): Subreddit
+
+
+    /**
+     * Subscribe or unsubscribe from a subreddit.
+     *
+     * @param action The action to perform.
+     * @param subredditNames A comma-separated list of subreddit names.
+     */
+    @FormUrlEncoded
+    @POST("/api/subscribe")
+    suspend fun subscribe(
+        @Field("action") action: SubscribeAction, @Field("sr_name") subredditNames: String
     )
 }
 
@@ -105,6 +123,14 @@ internal value class VoteAction private constructor(val dir: Int) {
         val UPVOTE = VoteAction(1)
         val UNVOTE = VoteAction(0)
         val DOWNVOTE = VoteAction(-1)
+    }
+}
+
+@JvmInline
+internal value class SubscribeAction private constructor(val action: String) {
+    companion object {
+        val SUBSCRIBE = SubscribeAction("sub")
+        val UNSUBSCRIBE = SubscribeAction("unsub")
     }
 }
 

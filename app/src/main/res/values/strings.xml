@@ -20,4 +20,7 @@
     <string name="homeSection">Home</string>
     <string name="hotSection">Hot</string>
     <string name="profileSection">Profile</string>
+    <string name="subredditPagePlaceholder">Subreddit Page</string>
+    <string name="leaveSubredditButton">Leave</string>
+    <string name="joinSubredditButton">Join</string>
 </resources>

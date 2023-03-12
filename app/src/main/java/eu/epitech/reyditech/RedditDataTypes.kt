@@ -578,6 +578,7 @@ internal data class Subreddit(
     @Json(name = "accounts_active") val accountsActive: Int?,
     /** Number of minutes the subreddit initially hides comment scores. */
     @Json(name = "comment_score_hide_mins") val commentScoreHideMins: Int?,
+    @Json(name = "community_icon") val communityIcon: String?,
     /** Sidebar text. */
     @Json(name = "description") val description: String?,
     /** Sidebar text, escaped HTML format. */
@@ -750,7 +751,12 @@ internal object ThingFactory : JsonAdapter.Factory {
                 data.remove("kind")
                 dataAdapter.toJson(
                     writer,
-                    ThingData(id = value.id, name = value.fullName, kind = value.kind, data = data)
+                    ThingData(
+                        id = value.id,
+                        name = value.fullName,
+                        kind = value.kind,
+                        data = data
+                    )
                 )
             }
         }
