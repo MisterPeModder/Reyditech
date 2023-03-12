@@ -60,7 +60,12 @@ private fun MainScreenUI(
     onVote: (id: FullName, action: VoteAction) -> Unit,
 ) {
     Theme {
-        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize().padding(bottom = 60.dp, top = 65.dp)) {
+        Box(
+            contentAlignment = Alignment.TopCenter,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 60.dp, top = 65.dp)
+        ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(onClick = onLogout) {
                     Icon(

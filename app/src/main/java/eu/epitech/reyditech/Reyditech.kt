@@ -3,7 +3,6 @@ package eu.epitech.reyditech
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.ui.Alignment
@@ -15,26 +14,15 @@ import androidx.navigation.compose.rememberNavController
 import eu.epitech.reyditech.screens.LoginScreen
 import eu.epitech.reyditech.screens.MainScreen
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults.textFieldWithoutLabelPadding
 import androidx.compose.runtime.*
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Blue
-import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.Transparent
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.format.TextStyle
 
 internal const val PACKAGE_NAME: String = "eu.epitech.reyditech"
 internal const val USER_AGENT: String = "android:eu.epitech.reyditech:v1.0.0 (by /u/MisterPeModder)"
@@ -48,65 +36,56 @@ internal const val USER_AGENT: String = "android:eu.epitech.reyditech:v1.0.0 (by
 internal fun Reyditech() {
     val navController = rememberNavController()
     var searchparam by remember { mutableStateOf(TextFieldValue("")) }
-    Scaffold(
-        topBar = {
-            TopAppBar(
+    Scaffold(topBar = {
+        TopAppBar(
 //                backgroundColor = MaterialTheme.colors.primaryVariant,
-                backgroundColor = Color(0xFF039BE5),
-                modifier = Modifier.height(63.dp),
-                title = {
+            backgroundColor = Color(0xFF039BE5), modifier = Modifier.height(63.dp), title = {
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.dark_logo),
-                            contentDescription = "Logo",
-                            tint = Color.Unspecified
-                        )
-                        Text(
-                            text = "Reyditech"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.dark_logo),
+                        contentDescription = "Logo",
+                        tint = Color.Unspecified
+                    )
+                    Text(
+                        text = "Reyditech"
 
-                        )
-                        OutlinedTextField(
-                            modifier = Modifier/*.height(150.dp)*/
-                                .background(Transparent)
-                                .padding(bottom = 2.dp)
-                                ,
-                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp),
-                            value = searchparam,
-                            onValueChange = {
-                                println(searchparam)
-                                searchparam = it
-                            },
-                            label = { Text(text = "search") },
-                            placeholder = { Text(text = "Search...") },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.search),
-                                    contentDescription = "search",
-                                    tint = Color.Unspecified,
-                                    modifier = Modifier.width(20.dp)
-                                )
-                            },
-                        )
-                    }
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .background(Transparent)
+                            .padding(bottom = 2.dp),
+                        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp),
+                        value = searchparam,
+                        onValueChange = {
+                            println(searchparam)
+                            searchparam = it
+                        },
+                        label = { Text(text = "search") },
+                        placeholder = { Text(text = "Search...") },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.search),
+                                contentDescription = "search",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.width(20.dp)
+                            )
+                        },
+                    )
                 }
-            )
-        },
+            })
+    },
 
-        content = {
-        },
-        bottomBar = {
+        content = {}, bottomBar = {
             BottomAppBar(
 //                backgroundColor = MaterialTheme.colors.secondaryVariant,
                 backgroundColor = Color(0xFF311B92),
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-//                        .absolutePadding(10.dp, 100.dp, 10.dp, 0.dp)
+                    modifier = Modifier.fillMaxWidth()
                     ,
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
@@ -127,7 +106,7 @@ internal fun Reyditech() {
                         )
                     }
                     Button(
-                        onClick = { println("Profil") /*navController.navigate("hot")*/ },
+                        onClick = { println("Profile") /*navController.navigate("hot")*/ },
                         colors = ButtonDefaults.buttonColors(backgroundColor = Transparent),
                         modifier = Modifier
                             .width(130.dp)
@@ -142,7 +121,7 @@ internal fun Reyditech() {
                         )
                     }
                     Button(
-                        onClick = { println("Profil") /* navController.navigate("hot")*/ },
+                        onClick = { println("Profile") /* navController.navigate("hot")*/ },
                         colors = ButtonDefaults.buttonColors(backgroundColor = Transparent),
                         modifier = Modifier
                             .width(130.dp)
@@ -151,16 +130,15 @@ internal fun Reyditech() {
 //                            .background(Transparent)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.profil),
-                            contentDescription = "Profil",
+                            painter = painterResource(id = R.drawable.profile),
+                            contentDescription = "Profile",
                             tint = Color.Unspecified
                         )
                     }
                 }
 
             }
-        }
-    )
+        })
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(onLoginFinished = { navController.navigate("main") })
