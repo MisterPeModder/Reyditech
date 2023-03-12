@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,8 +110,7 @@ internal fun LoginScreenUI(
                     Text(
                         "Reyditech",
                         style = TextStyle(color = Color.White, fontSize = 46.sp),
-                        modifier = Modifier
-                            .padding(bottom = 30.dp)
+                        modifier = Modifier.padding(bottom = 30.dp)
                     )
 
                 }
@@ -118,78 +118,93 @@ internal fun LoginScreenUI(
             Box(
                 contentAlignment = Alignment.Center,
             ) {
+                Column() {
 
-                Button(
-                    onClick = onLogin,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant),
-                    modifier = Modifier
-                        .height(50.dp)
-                        .fillMaxWidth()
+                    Button(
+                        onClick = onLogin,
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant),
+                        modifier = Modifier
+                            .height(50.dp)
+                            .fillMaxWidth()
 
-                ) {
-                    Row(
-                        Modifier.padding(0.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically) {
+                    ) {
+                        Row(
+                            Modifier.padding(0.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
 
 
-                        Icon(
-                            Icons.Filled.Login,
-                            contentDescription = stringResource(R.string.loginButtonDescription),
-                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                            Icon(
+                                Icons.Filled.Login,
+                                contentDescription = stringResource(R.string.loginButtonDescription),
+                                modifier = Modifier.size(ButtonDefaults.IconSize),
+                            )
+
+                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                            Text(stringResource(R.string.loginButton))
+
+                            Spacer(Modifier.size(50.dp))
+                            Icon(
+
+                                painter = painterResource(R.drawable.reddit_logo),
+                                contentDescription = stringResource(R.string.appLogo),
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(100.dp)
+                            )
+                        }
+
+
+                    }
+
+                    Spacer(Modifier.size(5.dp))
+                    if (stage is LoginStage.Authorized || stage is LoginStage.LoginFailed) {
+                        Button(
+                            onClick = onRevokeAuthorization,
+                            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant),
+                            modifier = Modifier
+                                .height(50.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Icon(
+                                Icons.Filled.Logout,
+                                contentDescription = "Revoke authorization",
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                            Text("Revoke authorization")
+                        }
+                    }
+                    when (stage) {
+                        is LoginStage.Authorized -> Text(
+                            "Authorized!",
+                            color = MaterialTheme.colors.onBackground,
+                            textAlign = TextAlign.Start
                         )
-
-                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(stringResource(R.string.loginButton))
-
-                        Spacer(Modifier.size(50.dp))
-                        Icon(
-
-                            painter = painterResource(R.drawable.reddit_logo),
-                            contentDescription = stringResource(R.string.appLogo),
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(100.dp)
+                        is LoginStage.AuthorizationFailed -> Text(
+                            stringResource(R.string.authorizationFailed),
+                            color = MaterialTheme.colors.error
                         )
+                        is LoginStage.LoginFailed -> Text(
+                            stringResource(R.string.loginFailed), color = MaterialTheme.colors.error
+                        )
+                        else -> Unit
                     }
                 }
-                if (stage is LoginStage.Authorized || stage is LoginStage.LoginFailed) {
-                    Button(onClick = onRevokeAuthorization) {
-                        Icon(
-                            Icons.Filled.Logout,
-                            contentDescription = "Revoke authorization",
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text("Revoke authorization")
-                    }
-                }
-                when (stage) {
-                    is LoginStage.Authorized -> Text(
-                        "Authorized!", color = MaterialTheme.colors.onBackground
-                    )
-                    is LoginStage.AuthorizationFailed -> Text(
-                        stringResource(R.string.authorizationFailed),
-                        color = MaterialTheme.colors.error
-                    )
-                    is LoginStage.LoginFailed -> Text(
-                        stringResource(R.string.loginFailed), color = MaterialTheme.colors.error
-                    )
-                    else -> Unit
-                }
-//                }
             }
 
-            Box(
-                modifier = Modifier
-                    .clip(RectangleShape)
-                    .size(500.dp)
-                    .graphicsLayer {
-                        clip = true
-                        shape = CircleShape
-                        translationY = 150.dp.toPx()
+            Box(modifier = Modifier
+                .clip(RectangleShape)
+                .size(500.dp)
+                .graphicsLayer {
+                    clip = true
+                    shape = CircleShape
+                    translationY = 150.dp.toPx()
 
-                    }
-                    .background(MaterialTheme.colors.secondaryVariant)) {
+
+                }
+//                .offset(x = -100.dp, y = -100.dp)
+                .background(MaterialTheme.colors.secondaryVariant)) {
                 Text(
                     "Bienvenue",
                     style = TextStyle(color = Color.White, fontSize = 46.sp),
