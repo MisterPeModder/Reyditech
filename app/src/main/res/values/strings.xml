@@ -15,4 +15,5 @@
     <string name="postsLoadingError">An error occurred while loading the posts</string>
     <string name="refreshButtonDescription">Refresh</string>
     <string name="postImageDescription">post image</string>
+    <string name="search">search</string>
 </resources>
