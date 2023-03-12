@@ -37,7 +37,6 @@ internal fun Reyditech() {
                 section = BottomSection.MAIN,
                 setSection = navController::navigateToSection,
                 initialPostType = PostType.BEST,
-                subreddit = "all",
             )
         }
         composable("hot") {
