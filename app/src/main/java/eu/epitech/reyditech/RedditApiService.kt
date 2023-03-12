@@ -10,12 +10,7 @@ import okhttp3.Response
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 import java.lang.reflect.Type
 
 /**
@@ -105,6 +100,24 @@ internal interface RedditApiService {
         @Field("include_over_18") includeOver18: Boolean = true,
         @Field("include_unadvertisable") includeUnadvertisable: Boolean = true,
     ): SubredditSearchResult
+    @PATCH("api/v1/me/prefs?raw_json=1")
+    suspend fun updateEnableFollowers(@Body requestBody: UpdateEnableFollowers): ProfileData
+    @PATCH("api/v1/me/prefs?raw_json=1")
+    suspend fun updateContent(@Body requestBody: UpdateContentRequestBody): ProfileData
+    @GET("/api/v1/me?raw_json=1")
+    suspend fun getUser(
+        @Query("after") after: FullName? = null,
+        @Query("before") before: FullName? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("count") count: Int? = null,
+        @Query("show") show: String? = null,
+    ): ProfileData
+
+
+
+
+
+
 }
 
 internal enum class PostType(@StringRes val stringRes: Int) {

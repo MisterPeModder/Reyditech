@@ -58,6 +58,7 @@ internal val RedditObjectAdapterFactory: PolymorphicJsonAdapterFactory<RedditObj
     PolymorphicJsonAdapterFactory.of(RedditObject::class.java, "kind")
         .withSubtype(Listing::class.java, "Listing")
         .withSubtype(Comment::class.java, "t1")
+        .withSubtype(User::class.java, "User")
         .withSubtype(Account::class.java, "t2")
         .withSubtype(Link::class.java, "t3")
         .withSubtype(Message::class.java, "t4")
@@ -173,7 +174,62 @@ internal data class Comment(
 ) : RedditObject, Votable, Created {
     override val kind: String = "t1"
 }
+data class UpdateContentRequestBody(
+    @Json(name = "over_18") val over18: Boolean,
+)
+data class CountryPreferences(
+    @Json(name = "country_code") val country_code: String?,
+)
+data class UpdateEnableFollowers(
+    @Json(name = "enable_followers") val enable_followers: Boolean,
+)
 
+data class UpdateUsername(
+    @Json(name = "display_name_prefixed") val display_name_prefixed: String?,
+)
+data class UpdateDesc(
+    @Json(name = "public_description") val public_description: String?,
+)
+internal data class ProfileData(
+    @Json(name = "id") override val id: String?,
+    @Json(name = "full_name") override val fullName: FullName?,
+    @Json(name = "country_code") val country_code: String?,
+    @Json(name = "created") override val created: Long?,
+    @Json(name = "created_utc") override val createdUtc: Long?,
+    @Json(name = "is_employee") val isEmployee: Boolean?,
+    @Json(name = "subreddit") val subreddit: User?,
+    @Json(name = "search_include_over_18") val search_include_over_18: Boolean?,
+    @Json(name = "threaded_messages") val threaded_message: Boolean?,
+
+    @Json(name = "over_18") var over_18: Boolean,
+    @Json(name = "public_description") val public_description: String?,
+    @Json(name = "g") val g: String?,
+
+    ): RedditObject, Created {
+    override val kind: String = "ProfileData"
+}
+internal data class User(
+    /** ID of the account; prepend t2_ to get fullname. */
+    @Json(name = "country_code") val country_code: String?,
+    @Json(name = "id") override val id: String?,
+    @Json(name = "full_name") override val fullName: FullName?,
+    @Json(name = "created") override val created: Long?,
+
+    @Json(name = "created_utc") override val createdUtc: Long?,
+    /** User's comment karma. */
+    @Json(name = "display_name") val displayName: String?,
+    @Json(name = "display_name_prefixed") var display_name_prefixed: String?,
+    @Json(name = "icon_img") val icon_img: String?,
+    @Json(name = "description") val description: String?,
+    @Json(name = "public_description") val public_description: String?,
+    @Json(name = "subscribers") val subscribers: Int?,
+    @Json(name = "label_nsfw") val label_nsfw: Boolean?,
+
+    /** User has unread mail? null if not your account. */
+
+) : RedditObject, Created {
+    override val kind: String = "User"
+}
 @Thing
 internal data class Account(
     /** ID of the account; prepend t2_ to get fullname. */

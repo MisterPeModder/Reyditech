@@ -99,4 +99,5 @@ internal enum class BottomSection {
 @Composable
 private fun ReyditechBottomBarPreview() {
     ReyditechBottomBar(section = BottomSection.MAIN, setSection = {})
+    ReyditechBottomBar(section = BottomSection.PROFILE, setSection = {})
 }
