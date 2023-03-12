@@ -1,5 +1,6 @@
 package eu.epitech.reyditech
 
+import androidx.annotation.StringRes
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -97,24 +98,24 @@ internal interface RedditApiService {
     )
 }
 
-internal enum class PostType {
+internal enum class PostType(@StringRes val stringRes: Int) {
     @Json(name = "best")
-    BEST,
+    BEST(R.string.postTypeBest),
 
     @Json(name = "controversial")
-    CONTROVERSIAL,
+    CONTROVERSIAL(R.string.postTypeControversial),
 
     @Json(name = "hot")
-    HOT,
+    HOT(R.string.postTypeHot),
 
     @Json(name = "new")
-    NEW,
+    NEW(R.string.postTypeNew),
 
     @Json(name = "rising")
-    RISING,
+    RISING(R.string.postTypeRising),
 
     @Json(name = "top")
-    TOP,
+    TOP(R.string.postTypeTop);
 }
 
 @JvmInline
@@ -176,6 +177,11 @@ private class AuthInterceptor(private val accessToken: String) : Interceptor {
             .header("user-agent", USER_AGENT)
             .build()
 
+//        val buffer = Buffer()
+//        newRequest.body?.writeTo(buffer)
+//
+//        Log.i("Auth", "Request, $newRequest");
+//        Log.i("Auth", "Body, $buffer");
         return chain.proceed(newRequest)
     }
 }
