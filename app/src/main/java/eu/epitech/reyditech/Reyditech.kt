@@ -81,13 +81,14 @@ internal fun Reyditech() {
 
         content = {
             NavHost(navController = navController, startDestination = "login") {
-            composable("login") {
-                LoginScreen(onLoginFinished = { navController.navigate("main") })
+                composable("login") {
+                    LoginScreen(onLoginFinished = { navController.navigate("main") })
+                }
+                composable("main") {
+                    MainScreen(onReLogin = { navController.navigate("login") })
+                }
             }
-            composable("main") {
-                MainScreen(onReLogin = { navController.navigate("login") })
-            }
-        }}, bottomBar = {
+        }, bottomBar = {
             BottomAppBar(
 //                backgroundColor = MaterialTheme.colors.secondaryVariant,
                 backgroundColor = Color(0xFF311B92),
