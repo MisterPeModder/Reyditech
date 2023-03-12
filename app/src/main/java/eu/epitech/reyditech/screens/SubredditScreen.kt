@@ -1,5 +1,6 @@
 package eu.epitech.reyditech.screens
 
+import android.graphics.Color.parseColor
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,13 +12,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import android.graphics.Color.parseColor
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.BottomDrawer
+import androidx.compose.material.BottomDrawerValue
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -25,6 +29,7 @@ import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PriorityHigh
+import androidx.compose.material.rememberBottomDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -68,7 +73,7 @@ import eu.epitech.reyditech.components.ReyditechScaffold
 import eu.epitech.reyditech.components.adjustBrightness
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import eu.epitech.reyditech.viewmodels.LoginViewModel
-import java.lang.IllegalArgumentException
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun SubredditScreen(
@@ -110,6 +115,7 @@ internal fun SubredditScreen(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun SubredditScreenUI(
     subredditName: String,
@@ -120,17 +126,37 @@ private fun SubredditScreenUI(
     onSubscribe: (SubscribeAction, String) -> Unit,
     subscribing: Boolean?,
 ) {
-    ReyditechScaffold(section = null, setSection = setSection) {
+    val drawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed)
+
+    val content = @Composable {
+        val scope = rememberCoroutineScope()
+
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                SubredditHeader(subredditName = subredditName,
+                SubredditHeader(
+                    subredditName = subredditName,
                     subreddit = subreddit,
                     onSubscribe = onSubscribe,
                     subscribing = subscribing,
-                    onOpenSubredditInfo = {})
+                    onOpenSubredditInfo = { scope.launch { drawerState.expand() } },
+                )
                 PostList(pager = postsPager, onVote = onVote, showSubreddit = false)
             }
         }
+    }
+
+    if (subreddit != null) {
+        ReyditechScaffold(section = null, setSection = setSection) {
+            BottomDrawer(
+                drawerState = drawerState,
+                drawerContent = { SubredditInfo(subreddit = subreddit) },
+                gesturesEnabled = drawerState.isOpen,
+                drawerShape = MaterialTheme.shapes.medium,
+                content = content,
+            )
+        }
+    } else {
+        content()
     }
 }
 
@@ -246,10 +272,10 @@ private fun BoxScope.SubredditBannerImage(subreddit: Subreddit?) {
         if (painter.state !is AsyncImagePainter.State.Error) {
             SubcomposeAsyncImageContent(
                 modifier = Modifier.placeholder(
-                        visible = painter.state is AsyncImagePainter.State.Loading,
-                        color = Color.Gray,
-                        highlight = PlaceholderHighlight.shimmer()
-                    )
+                    visible = painter.state is AsyncImagePainter.State.Loading,
+                    color = Color.Gray,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
             )
         }
     }
@@ -270,5 +296,37 @@ private fun SubscribingIndicator(subscribing: Boolean?) {
             modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+    }
+}
+
+@Composable
+private fun SubredditInfo(subreddit: Subreddit) {
+    Column(modifier = Modifier.padding(10.dp)) {
+        Text(
+            text = "About Community",
+            fontWeight = FontWeight.Bold,
+        )
+        Row {
+            if (subreddit.displayName != null) {
+                Text(
+                    text = subreddit.displayName,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            if (subreddit.subscribers != null) {
+                if (subreddit.displayName != null) {
+                    Text(
+                        text = " · ",
+                        color = Color.Gray,
+                    )
+                }
+                Text(
+                    text = "${subreddit.subscribers} subscribers",
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        Text(text = subreddit.publicDescription ?: "No description")
+        Spacer(modifier = Modifier.height(50.dp))
     }
 }
