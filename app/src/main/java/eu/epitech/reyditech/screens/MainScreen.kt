@@ -64,7 +64,6 @@ private fun MainScreenUI(
             contentAlignment = Alignment.TopCenter,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 60.dp, top = 65.dp)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(onClick = onLogout) {

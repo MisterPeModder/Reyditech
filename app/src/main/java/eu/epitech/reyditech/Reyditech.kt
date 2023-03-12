@@ -79,14 +79,21 @@ internal fun Reyditech() {
             })
     },
 
-        content = {}, bottomBar = {
+        content = {
+            NavHost(navController = navController, startDestination = "login") {
+            composable("login") {
+                LoginScreen(onLoginFinished = { navController.navigate("main") })
+            }
+            composable("main") {
+                MainScreen(onReLogin = { navController.navigate("login") })
+            }
+        }}, bottomBar = {
             BottomAppBar(
 //                backgroundColor = MaterialTheme.colors.secondaryVariant,
                 backgroundColor = Color(0xFF311B92),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                    ,
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -139,12 +146,5 @@ internal fun Reyditech() {
 
             }
         })
-    NavHost(navController = navController, startDestination = "login") {
-        composable("login") {
-            LoginScreen(onLoginFinished = { navController.navigate("main") })
-        }
-        composable("main") {
-            MainScreen(onReLogin = { navController.navigate("login") })
-        }
-    }
+
 }
