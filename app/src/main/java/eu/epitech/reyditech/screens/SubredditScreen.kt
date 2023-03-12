@@ -80,6 +80,7 @@ import kotlinx.coroutines.launch
 internal fun SubredditScreen(
     subredditName: String,
     setSection: (BottomSection) -> Unit,
+    onGoToSubreddit: (String) -> Unit,
     loginViewModel: LoginViewModel = viewModel<AndroidLoginViewModel>(factory = AndroidLoginViewModel.Factory),
 ) {
     val scope = rememberCoroutineScope()
@@ -116,6 +117,7 @@ internal fun SubredditScreen(
         subscribing = subscribing,
         postType = postType,
         setPostType = setPostType,
+        onGoToSubreddit = onGoToSubreddit,
     )
 }
 
@@ -131,6 +133,7 @@ private fun SubredditScreenUI(
     subscribing: Boolean?,
     postType: PostType,
     setPostType: (PostType) -> Unit,
+    onGoToSubreddit: (String) -> Unit,
 ) {
     val drawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed)
 
@@ -153,7 +156,11 @@ private fun SubredditScreenUI(
     }
 
     if (subreddit != null) {
-        ReyditechScaffold(section = null, setSection = setSection) {
+        ReyditechScaffold(
+            section = null,
+            setSection = setSection,
+            onGoToSubreddit = onGoToSubreddit
+        ) {
             BottomDrawer(
                 drawerState = drawerState,
                 drawerContent = { SubredditInfo(subreddit = subreddit) },
@@ -182,7 +189,7 @@ private fun SubredditHeader(
         subreddit?.primaryColor?.let {
             try {
                 Color(parseColor(it))
-            } catch (e: IllegalArgumentException) {
+            } catch (e: RuntimeException) {
                 null
             }
         } ?: Color.Gray
