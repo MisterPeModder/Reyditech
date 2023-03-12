@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import eu.epitech.reyditech.components.BottomSection
 import eu.epitech.reyditech.screens.LoginScreen
 import eu.epitech.reyditech.screens.MainScreen
+import eu.epitech.reyditech.screens.ProfileScreen
 import eu.epitech.reyditech.screens.SubredditScreen
 
 internal const val PACKAGE_NAME: String = "eu.epitech.reyditech"
@@ -30,6 +31,7 @@ internal fun Reyditech() {
         composable("login") {
             LoginScreen(onLoginFinished = { navController.navigate("main") })
         }
+
         composable("main") {
             MainScreen(
                 onReLogin = reLogin,
@@ -49,6 +51,12 @@ internal fun Reyditech() {
                 subreddit = "popular",
             )
         }
+
+        composable("profile") {
+            ProfileScreen(
+                onLogin = { navController.navigate("profile") }
+            )
+        }
         composable("subreddit/{subredditName}") { backStackEntry ->
             SubredditScreen(
                 subredditName = backStackEntry.arguments?.getString("subredditName") ?: "all",
@@ -63,7 +71,7 @@ private fun NavHostController.navigateToSection(section: BottomSection) {
     when (section) {
         BottomSection.MAIN -> navigate("main") { popUpTo("main") }
         BottomSection.HOT -> navigate("hot") { popUpTo("hot") }
-        BottomSection.PROFILE -> {
+        BottomSection.PROFILE -> { navigate("profile") { popUpTo("profile") }
             /* TODO */
         }
     }

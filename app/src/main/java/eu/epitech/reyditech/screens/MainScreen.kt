@@ -16,6 +16,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +70,7 @@ internal fun MainScreen(
                 onReLogin()
             }
         },
+
         onVote = { id, action -> loginViewModel.performVote(scope, id, action) },
         onGoToSubreddit = onGoToSubreddit,
         section = section,
@@ -122,6 +124,7 @@ private fun MainScreenUI(
                         Text(stringResource(R.string.logoutButton))
                     }
                 }
+
                 PostList(
                     pager = postsPager,
                     onVote = onVote,

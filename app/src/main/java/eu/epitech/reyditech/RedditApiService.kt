@@ -10,12 +10,7 @@ import okhttp3.Response
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 import java.lang.reflect.Type
 
 /**
@@ -96,15 +91,6 @@ internal interface RedditApiService {
     suspend fun subscribe(
         @Field("action") action: SubscribeAction, @Field("sr_name") subredditNames: String
     )
-
-    @FormUrlEncoded
-    @POST("/api/search_reddit_names")
-    suspend fun searchSubreddits(
-        @Field("query") query: String,
-        @Field("exact") exact: Boolean = false,
-        @Field("include_over_18") includeOver18: Boolean = true,
-        @Field("include_unadvertisable") includeUnadvertisable: Boolean = true,
-    ): SubredditSearchResult
 }
 
 internal enum class PostType(@StringRes val stringRes: Int) {
