@@ -23,4 +23,6 @@
     <string name="subredditPagePlaceholder">Subreddit Page</string>
     <string name="leaveSubredditButton">Leave</string>
     <string name="joinSubredditButton">Join</string>
+    <string name="openSubredditInfoButton">About community…</string>
+    <string name="subredditBannerImageDescription">Subreddit banner image</string>
 </resources>

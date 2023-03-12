@@ -576,6 +576,7 @@ internal data class Subreddit(
     @Json(name = "full_name") override val fullName: FullName?,
     /** Number of users active in last 15 minutes. */
     @Json(name = "accounts_active") val accountsActive: Int?,
+    @Json(name = "banner_background_image") val bannerBackgroundImage: String?,
     /** Number of minutes the subreddit initially hides comment scores. */
     @Json(name = "comment_score_hide_mins") val commentScoreHideMins: Int?,
     @Json(name = "community_icon") val communityIcon: String?,
@@ -591,8 +592,10 @@ internal data class Subreddit(
     @Json(name = "header_size") val headerSize: Dimensions?,
     /** Description of header image shown on hover, or null. */
     @Json(name = "header_title") val headerTitle: String?,
+    @Json(name = "mobile_banner_image") val mobileBannerImage: String?,
     /** Whether the subreddit is marked as NSFW. */
     @Json(name = "over18") val over18: Boolean?,
+    @Json(name = "primary_color") val primaryColor: String?,
     /** Description shown in subreddit search results? */
     @Json(name = "public_description") val publicDescription: String?,
     /** Whether the subreddit's traffic page is publicly-accessible. */
