@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -277,6 +278,8 @@ private fun PostLink(uri: Uri) {
     Text(
         text = uri.toString(),
         modifier = Modifier.padding(vertical = 5.dp),
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
         color = Color.Blue,
     )
 }
