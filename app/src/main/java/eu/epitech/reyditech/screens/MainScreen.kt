@@ -61,9 +61,7 @@ private fun MainScreenUI(
 ) {
     Theme {
         Box(
-            contentAlignment = Alignment.TopCenter,
-            modifier = Modifier
-                .fillMaxSize()
+            contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(onClick = onLogout) {
