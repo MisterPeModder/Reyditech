@@ -3,25 +3,34 @@ package eu.epitech.reyditech.screens
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.epitech.reyditech.*
 import eu.epitech.reyditech.R
 import eu.epitech.reyditech.auth.LoginStage
 import eu.epitech.reyditech.auth.OAuth2Authorize
 import eu.epitech.reyditech.components.Theme
-import eu.epitech.reyditech.viewmodels.LoginViewModel
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
+import eu.epitech.reyditech.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 
 @Suppress("SpellCheckingInspection")
@@ -73,23 +82,75 @@ internal fun LoginScreenUI(
     onLogin: () -> Unit = {},
     onRevokeAuthorization: () -> Unit = {},
 ) {
+
     Theme {
-        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    Icons.Filled.LockOpen,
-                    contentDescription = stringResource(R.string.appLogo),
-                    modifier = Modifier.fillMaxSize(0.5f),
-                    tint = MaterialTheme.colors.secondary,
-                )
-                Button(onClick = onLogin) {
+
+        Column(
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(modifier = Modifier
+                .clip(RectangleShape)
+                .size(500.dp)
+                .graphicsLayer {
+                    clip = true
+                    shape = CircleShape
+                    translationY = -200.dp.toPx()
+                }
+                .background(MaterialTheme.colors.secondaryVariant)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                ) {
                     Icon(
-                        Icons.Filled.Login,
-                        contentDescription = stringResource(R.string.loginButtonDescription),
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                        painter = painterResource(R.drawable.light_logo),
+                        contentDescription = stringResource(R.string.appLogo),
+                        tint = Color.Unspecified,
                     )
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(stringResource(R.string.loginButton))
+                    Text(
+                        "Reyditech",
+                        style = TextStyle(color = Color.White, fontSize = 46.sp),
+                        modifier = Modifier
+                            .padding(bottom = 30.dp)
+                    )
+
+                }
+            }
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
+
+                Button(
+                    onClick = onLogin,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondaryVariant),
+                    modifier = Modifier
+                        .height(50.dp)
+                        .fillMaxWidth()
+
+                ) {
+                    Row(
+                        Modifier.padding(0.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically) {
+
+
+                        Icon(
+                            Icons.Filled.Login,
+                            contentDescription = stringResource(R.string.loginButtonDescription),
+                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                        )
+
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(R.string.loginButton))
+
+                        Spacer(Modifier.size(50.dp))
+                        Icon(
+
+                            painter = painterResource(R.drawable.reddit_logo),
+                            contentDescription = stringResource(R.string.appLogo),
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
                 }
                 if (stage is LoginStage.Authorized || stage is LoginStage.LoginFailed) {
                     Button(onClick = onRevokeAuthorization) {
@@ -115,6 +176,28 @@ internal fun LoginScreenUI(
                     )
                     else -> Unit
                 }
+//                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RectangleShape)
+                    .size(500.dp)
+                    .graphicsLayer {
+                        clip = true
+                        shape = CircleShape
+                        translationY = 150.dp.toPx()
+
+                    }
+                    .background(MaterialTheme.colors.secondaryVariant)) {
+                Text(
+                    "Bienvenue",
+                    style = TextStyle(color = Color.White, fontSize = 46.sp),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 50.dp)
+                )
+
             }
         }
     }
