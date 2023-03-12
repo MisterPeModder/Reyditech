@@ -29,6 +29,7 @@ import eu.epitech.reyditech.*
 import eu.epitech.reyditech.R
 import eu.epitech.reyditech.auth.LoginStage
 import eu.epitech.reyditech.auth.OAuth2Authorize
+import eu.epitech.reyditech.components.AppLogo
 import eu.epitech.reyditech.components.Theme
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import eu.epitech.reyditech.viewmodels.LoginViewModel
@@ -102,13 +103,9 @@ internal fun LoginScreenUI(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.light_logo),
-                        contentDescription = stringResource(R.string.appLogo),
-                        tint = Color.Unspecified,
-                    )
+                    AppLogo()
                     Text(
-                        "Reyditech",
+                        stringResource(R.string.app_name),
                         style = TextStyle(color = Color.White, fontSize = 46.sp),
                         modifier = Modifier.padding(bottom = 30.dp)
                     )
@@ -206,7 +203,7 @@ internal fun LoginScreenUI(
 //                .offset(x = -100.dp, y = -100.dp)
                 .background(MaterialTheme.colors.secondaryVariant)) {
                 Text(
-                    "Bienvenue",
+                    stringResource(R.string.loginPageWelcome),
                     style = TextStyle(color = Color.White, fontSize = 46.sp),
                     modifier = Modifier
                         .align(Alignment.TopCenter)

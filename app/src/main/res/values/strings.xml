@@ -25,6 +25,7 @@
     <string name="joinSubredditButton">Join</string>
     <string name="openSubredditInfoButton">About community…</string>
     <string name="subredditBannerImageDescription">Subreddit banner image</string>
+    <string name="loginPageWelcome">Welcome</string>
     <string name="postsFilterLabel">Filter by</string>
     <string name="postTypeBest">Best</string>
     <string name="postTypeControversial">Controversial</string>
