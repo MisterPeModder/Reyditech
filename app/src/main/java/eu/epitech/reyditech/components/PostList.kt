@@ -35,6 +35,8 @@ import eu.epitech.reyditech.VoteAction
 internal fun PostList(
     pager: Pager<ListingPagingSource.Cursor, Link>,
     onVote: (id: FullName, action: VoteAction) -> Unit = { _, _ -> },
+    onGoToSubreddit: (String) -> Unit = {},
+    showSubreddit: Boolean,
 ) {
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
     val state = lazyPagingItems.loadState
@@ -72,11 +74,14 @@ internal fun PostList(
                 if (post == null) {
                     Post()
                 } else {
-                    Post(post = post, onVote = { action ->
-                        if (post.name != null) {
-                            onVote(post.name, action)
-                        }
-                    })
+                    Post(post = post,
+                        onGoToSubreddit = onGoToSubreddit,
+                        showSubreddit = showSubreddit,
+                        onVote = { action ->
+                            if (post.name != null) {
+                                onVote(post.name, action)
+                            }
+                        })
                 }
             }
         }

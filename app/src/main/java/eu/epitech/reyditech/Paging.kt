@@ -21,12 +21,14 @@ internal class ListingPagingSource<T : RedditObject>(private val request: Listin
                     count = params.key?.count ?: 0,
                     limit = params.loadSize
                 )
+
                 is LoadParams.Append -> request.perform(
                     before = null,
                     after = params.key.fullName,
                     count = params.key.count,
                     limit = params.loadSize
                 )
+
                 is LoadParams.Prepend -> request.perform(
                     before = params.key.fullName,
                     after = null,
@@ -72,21 +74,33 @@ internal typealias PostsPager = Pager<ListingPagingSource.Cursor, Link>
 /**
  * Creates a [PostsPager] for Reddit [Link]s.
  */
-internal fun PostsPager(loginViewModel: LoginViewModel): PostsPager =
-    Pager(
-        config = PagingConfig(pageSize = 10, initialLoadSize = 10, enablePlaceholders = true),
-        pagingSourceFactory = {
-            ListingPagingSource { before, after, count, limit ->
-                loginViewModel.request {
-                    posts(
-                        type = PostType.BEST,
-                        before = before,
-                        after = after,
-                        count = count,
-                        limit = limit,
-                        subreddit = "gifs"
-                    )
-                }
-            }
+internal fun PostsPager(loginViewModel: LoginViewModel, type: PostType): PostsPager =
+    PostsPager { before, after, count, limit ->
+        loginViewModel.request {
+            posts(
+                type = type, before = before, after = after, count = count, limit = limit,
+            )
         }
-    )
+    }
+
+/**
+ * Creates a [PostsPager] for Reddit [Link]s.
+ */
+internal fun PostsPager(
+    loginViewModel: LoginViewModel, type: PostType, subreddit: String
+): PostsPager = PostsPager { before, after, count, limit ->
+    loginViewModel.request {
+        posts(
+            type = type,
+            subreddit = subreddit,
+            before = before,
+            after = after,
+            count = count,
+            limit = limit,
+        )
+    }
+}
+
+internal fun PostsPager(request: ListingRequest<Link>): PostsPager =
+    Pager(config = PagingConfig(pageSize = 10, initialLoadSize = 10, enablePlaceholders = true),
+        pagingSourceFactory = { ListingPagingSource(request) })
