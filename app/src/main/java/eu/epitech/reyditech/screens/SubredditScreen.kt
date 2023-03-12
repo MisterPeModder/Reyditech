@@ -2,24 +2,31 @@ package eu.epitech.reyditech.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import android.graphics.Color.parseColor
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,11 +36,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
+import coil.decode.ImageDecoderDecoder
+import coil.request.ImageRequest
+import coil.size.Scale
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
@@ -48,8 +65,10 @@ import eu.epitech.reyditech.components.BottomSection
 import eu.epitech.reyditech.components.PostList
 import eu.epitech.reyditech.components.ProfileImage
 import eu.epitech.reyditech.components.ReyditechScaffold
+import eu.epitech.reyditech.components.adjustBrightness
 import eu.epitech.reyditech.viewmodels.AndroidLoginViewModel
 import eu.epitech.reyditech.viewmodels.LoginViewModel
+import java.lang.IllegalArgumentException
 
 @Composable
 internal fun SubredditScreen(
@@ -104,12 +123,11 @@ private fun SubredditScreenUI(
     ReyditechScaffold(section = null, setSection = setSection) {
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                SubredditHeader(
-                    subredditName = subredditName,
+                SubredditHeader(subredditName = subredditName,
                     subreddit = subreddit,
                     onSubscribe = onSubscribe,
                     subscribing = subscribing,
-                )
+                    onOpenSubredditInfo = {})
                 PostList(pager = postsPager, onVote = onVote, showSubreddit = false)
             }
         }
@@ -122,56 +140,117 @@ private fun SubredditHeader(
     subreddit: Subreddit?,
     onSubscribe: (SubscribeAction, String) -> Unit,
     subscribing: Boolean?,
+    onOpenSubredditInfo: (Subreddit) -> Unit,
 ) {
     val placeholder = Modifier.placeholder(
         visible = subreddit == null, highlight = PlaceholderHighlight.shimmer()
     )
+    val primaryColor = remember {
+        subreddit?.primaryColor?.let {
+            try {
+                Color(parseColor(it))
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        } ?: Color.Gray
+    }
 
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(5.dp)
+            .fillMaxWidth()
+            .border(ButtonDefaults.outlinedBorder, MaterialTheme.shapes.large),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ProfileImage(
-                uri = subreddit?.communityIcon?.toUri(),
+        SubredditBannerImage(subreddit)
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .size(ButtonDefaults.MinHeight)
-                    .background(Color.Gray)
-            )
-            Column {
-                Text(
-                    text = subreddit?.displayName
-                        ?: stringResource(R.string.subredditPagePlaceholder),
-                    fontWeight = FontWeight.Bold,
-                    modifier = placeholder.padding(horizontal = 10.dp)
-                )
-                Text(
-                    text = "r/${subredditName}",
-                    color = Color.Gray,
-                    modifier = placeholder.padding(horizontal = 10.dp)
-                )
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ProfileImage(
+                        uri = subreddit?.communityIcon?.toUri(),
+                        modifier = Modifier
+                            .size(ButtonDefaults.MinHeight)
+                            .background(primaryColor)
+                    )
+                    Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                        Text(
+                            text = subreddit?.displayName
+                                ?: stringResource(R.string.subredditPagePlaceholder),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                        )
+                        Text(
+                            text = "r/${subredditName}",
+                            color = Color.White,
+                        )
+                        Text(
+                            text = stringResource(R.string.openSubredditInfoButton),
+                            color = MaterialTheme.colors.secondary.copy(alpha = 0.8f)
+                                .compositeOver(primaryColor),
+                            fontWeight = FontWeight.Bold,
+                            modifier = placeholder.clickable {
+                                if (subreddit != null) onOpenSubredditInfo(subreddit)
+                            },
+                        )
+                    }
+                }
+                if (subreddit?.userIsSubscriber == true) {
+                    OutlinedButton(
+                        onClick = { onSubscribe(SubscribeAction.UNSUBSCRIBE, subredditName) },
+                        modifier = placeholder,
+                        enabled = subscribing != true,
+                    ) {
+                        SubscribingIndicator(subscribing)
+                        Text(stringResource(R.string.leaveSubredditButton))
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = { onSubscribe(SubscribeAction.SUBSCRIBE, subredditName) },
+                        modifier = placeholder,
+                        enabled = subreddit != null && subscribing != true,
+                    ) {
+                        SubscribingIndicator(subscribing)
+                        Text(stringResource(R.string.joinSubredditButton))
+                    }
+                }
             }
         }
-        if (subreddit?.userIsSubscriber == true) {
-            OutlinedButton(
-                onClick = { onSubscribe(SubscribeAction.UNSUBSCRIBE, subredditName) },
-                modifier = placeholder,
-                enabled = subscribing != true,
-            ) {
-                SubscribingIndicator(subscribing)
-                Text(stringResource(R.string.leaveSubredditButton))
-            }
-        } else {
-            OutlinedButton(
-                onClick = { onSubscribe(SubscribeAction.SUBSCRIBE, subredditName) },
-                modifier = placeholder,
-                enabled = subreddit != null && subscribing != true,
-            ) {
-                SubscribingIndicator(subscribing)
-                Text(stringResource(R.string.joinSubredditButton))
-            }
+    }
+}
+
+@Composable
+private fun BoxScope.SubredditBannerImage(subreddit: Subreddit?) {
+    var imageUrl: String? = subreddit?.mobileBannerImage
+    if (imageUrl.isNullOrBlank()) imageUrl = subreddit?.bannerBackgroundImage
+
+    val backgroundImageModel = with(ImageRequest.Builder(LocalContext.current)) {
+        data(imageUrl?.toUri())
+        crossfade(true)
+        scale(Scale.FIT)
+        decoderFactory(ImageDecoderDecoder.Factory())
+        build()
+    }
+
+    SubcomposeAsyncImage(
+        model = backgroundImageModel,
+        contentDescription = stringResource(R.string.subredditBannerImageDescription),
+        contentScale = ContentScale.Crop, // or some other scale
+        modifier = Modifier.matchParentSize(),
+        colorFilter = ColorFilter.adjustBrightness(-0.5f)
+    ) {
+        if (painter.state !is AsyncImagePainter.State.Error) {
+            SubcomposeAsyncImageContent(
+                modifier = Modifier.placeholder(
+                        visible = painter.state is AsyncImagePainter.State.Loading,
+                        color = Color.Gray,
+                        highlight = PlaceholderHighlight.shimmer()
+                    )
+            )
         }
     }
 }
