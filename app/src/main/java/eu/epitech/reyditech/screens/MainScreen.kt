@@ -60,7 +60,6 @@ internal fun MainScreen(
     } else {
         PostsPager(loginViewModel, postType, subreddit)
     }
-//    val (searchParam, setSearchParam) = remember { mutableStateOf(TextFieldValue("")) }
 
     MainScreenUI(
         postsPager = postsPager,
@@ -90,7 +89,12 @@ private fun MainScreenUI(
     postType: PostType,
     setPostType: (PostType) -> Unit,
 ) {
-    ReyditechScaffold(section = section, setSection = setSection) {
+
+    ReyditechScaffold(
+        onGoToSubreddit = onGoToSubreddit,
+        section = section,
+        setSection = setSection,
+    ) {
         Box(
             contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()
         ) {

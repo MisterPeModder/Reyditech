@@ -53,6 +53,7 @@ internal fun Reyditech() {
             SubredditScreen(
                 subredditName = backStackEntry.arguments?.getString("subredditName") ?: "all",
                 setSection = navController::navigateToSection,
+                onGoToSubreddit = { name -> navController.navigate("subreddit/$name") },
             )
         }
     }

@@ -96,6 +96,15 @@ internal interface RedditApiService {
     suspend fun subscribe(
         @Field("action") action: SubscribeAction, @Field("sr_name") subredditNames: String
     )
+
+    @FormUrlEncoded
+    @POST("/api/search_reddit_names")
+    suspend fun searchSubreddits(
+        @Field("query") query: String,
+        @Field("exact") exact: Boolean = false,
+        @Field("include_over_18") includeOver18: Boolean = true,
+        @Field("include_unadvertisable") includeUnadvertisable: Boolean = true,
+    ): SubredditSearchResult
 }
 
 internal enum class PostType(@StringRes val stringRes: Int) {
@@ -134,6 +143,8 @@ internal value class SubscribeAction private constructor(val action: String) {
         val UNSUBSCRIBE = SubscribeAction("unsub")
     }
 }
+
+internal data class SubredditSearchResult(val names: List<String>)
 
 @FunctionalInterface
 internal fun interface ListingRequest<T : RedditObject> {
