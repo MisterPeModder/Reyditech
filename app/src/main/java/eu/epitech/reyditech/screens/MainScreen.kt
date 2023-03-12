@@ -48,11 +48,6 @@ import kotlinx.coroutines.launch
 internal fun MainScreen(
     loginViewModel: LoginViewModel = viewModel<AndroidLoginViewModel>(factory = AndroidLoginViewModel.Factory),
     onReLogin: () -> Unit = {},
-    onGoToSubreddit: (String) -> Unit,
-    section: BottomSection,
-    setSection: (BottomSection) -> Unit,
-    initialPostType: PostType,
-    subreddit: String? = null,
 ) {
     val scope = rememberCoroutineScope()
     val (postType, setPostType) = remember { mutableStateOf(initialPostType) }
@@ -62,22 +57,12 @@ internal fun MainScreen(
         PostsPager(loginViewModel, postType, subreddit)
     }
 
-    MainScreenUI(
-        postsPager = postsPager,
-        onLogout = {
-            scope.launch {
-                loginViewModel.logout()
-                onReLogin()
-            }
-        },
-
-        onVote = { id, action -> loginViewModel.performVote(scope, id, action) },
-        onGoToSubreddit = onGoToSubreddit,
-        section = section,
-        setSection = setSection,
-        postType = postType,
-        setPostType = setPostType,
-    )
+    MainScreenUI(postsPager = postsPager, onLogout = {
+        scope.launch {
+            loginViewModel.logout()
+            onReLogin()
+        }
+    })
 }
 
 @Composable
@@ -90,6 +75,7 @@ private fun MainScreenUI(
     setSection: (BottomSection) -> Unit,
     postType: PostType,
     setPostType: (PostType) -> Unit,
+    onUserProfile: () -> Unit = {},
 ) {
 
     ReyditechScaffold(
@@ -125,7 +111,15 @@ private fun MainScreenUI(
                     }
                 }
 
-                PostList(
+Button(onClick = onUserProfile) {
+                    Icon(
+                        Icons.Filled.Login,
+                        contentDescription = stringResource(R.string.userProfileButton),
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                    )
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text(stringResource(R.string.userProfile))
+                }                PostList(
                     pager = postsPager,
                     onVote = onVote,
                     onGoToSubreddit = onGoToSubreddit,

@@ -3,6 +3,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    kotlin("plugin.serialization") version "1.6.0"
 }
 
 android {
@@ -63,6 +64,15 @@ dependencies {
     implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-ktx:1.9.0")
+    implementation ("org.json:json:20210307")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+
+    implementation ("com.squareup.moshi:moshi:1.12.0")
+    implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
+
+    implementation ("com.google.code.gson:gson:2.8.9")
+    implementation("com.google.firebase:firebase-crashlytics-buildtools:2.8.1")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -78,7 +88,12 @@ dependencies {
     // Android Studio Preview support
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
-
+    implementation("io.coil-kt:coil-bom:2.2.2")
+    implementation("io.coil-kt:coil")
+    implementation("io.coil-kt:coil-compose")
+    implementation("io.coil-kt:coil-gif")
+    implementation("io.coil-kt:coil-svg")
+    implementation("io.coil-kt:coil-video")
     // UI Tests
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

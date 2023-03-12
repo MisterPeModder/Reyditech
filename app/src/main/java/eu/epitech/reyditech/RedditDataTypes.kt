@@ -112,6 +112,7 @@ internal sealed interface Created : RedditObject {
 internal val RedditObjectAdapterFactory: PolymorphicJsonAdapterFactory<RedditObject> =
     PolymorphicJsonAdapterFactory.of(RedditObject::class.java, "kind")
         .withSubtype(Listing::class.java, "Listing")
+        .withSubtype(User::class.java, "User")
         .withSubtype(Comment::class.java, "t1")
         .withSubtype(Account::class.java, "t2")
         .withSubtype(Link::class.java, "t3")
@@ -143,7 +144,6 @@ internal data class Listing<out T : RedditObject>(
 ) : RedditObject {
     @Suppress("UNCHECKED_CAST")
     val children: List<T> = _children as List<T>
-
     override val kind: String = "Listing"
 }
 
@@ -268,7 +268,79 @@ internal data class Account(
 ) : RedditObject, Created {
     override val kind: String = "t2"
 }
+data class UpdateContentRequestBody(
+    @Json(name = "over_18") val over18: Boolean,
+)
 
+data class UpdateEnableFollowers(
+    @Json(name = "enable_followers") val enable_followers: Boolean,
+)
+
+data class UpdateUsername(
+    @Json(name = "display_name_prefixed") val display_name_prefixed: String?,
+)
+data class UpdateDesc(
+    @Json(name = "sr") val subredditName: String?, // le nom du subreddit à modifier, ou null pour en créer un nouveau
+    @Json(name = "name") val newSubredditName: String?, // le nom du nouveau subreddit à créer, ou null pour en modifier un existant
+    @Json(name = "public_description") val publicDescription: String // la nouvelle description publique à définir
+)
+
+data class UpdateName(
+    @Json(name = "sr") val subredditName: String?, // le nom du subreddit à modifier, ou null pour en créer un nouveau
+    @Json(name = "name") val newSubredditName: String?, // le nom du nouveau subreddit à créer, ou null pour en modifier un existant
+    @Json(name = "title") val title: String // la nouvelle description publique à définir
+)
+
+internal data class UpdateData(
+    @Json(name = "id") override val id: String?,
+    @Json(name = "full_name") override val fullName: FullName?,
+    @Json(name = "created") override val created: Long?,
+    @Json(name = "created_utc") override val createdUtc: Long?,
+    @Json(name = "is_employee") val isEmployee: Boolean?,
+    @Json(name = "subreddit") val subreddit: UpdateDesc?,
+    @Json(name = "search_include_over_18") val search_include_over_18: Boolean?,
+    @Json(name = "threaded_messages") val threaded_message: Boolean?,
+    @Json(name = "over_18") var over_18: Boolean,
+    @Json(name = "public_description") val public_description: String?,
+
+    ): RedditObject, Created {
+    override val kind: String = "ProfileData"
+}
+internal data class ProfileData(
+    @Json(name = "id") override val id: String?,
+    @Json(name = "full_name") override val fullName: FullName?,
+    @Json(name = "created") override val created: Long?,
+    @Json(name = "created_utc") override val createdUtc: Long?,
+    @Json(name = "is_employee") val isEmployee: Boolean?,
+    @Json(name = "subreddit") val subreddit: User?,
+    @Json(name = "search_include_over_18") val search_include_over_18: Boolean?,
+    @Json(name = "threaded_messages") val threaded_message: Boolean?,
+    @Json(name = "over_18") var over_18: Boolean,
+    @Json(name = "public_description") val public_description: String?,
+
+    ): RedditObject, Created {
+    override val kind: String = "ProfileData"
+}
+internal data class User(
+    /** ID of the account; prepend t2_ to get fullname. */
+    @Json(name = "id") override val id: String?,
+    @Json(name = "full_name") override val fullName: FullName?,
+    @Json(name = "created") override val created: Long?,
+    @Json(name = "created_utc") override val createdUtc: Long?,
+    /** User's comment karma. */
+    @Json(name = "display_name") val displayName: String?,
+    @Json(name = "display_name_prefixed") var display_name_prefixed: String?,
+    @Json(name = "icon_img") val icon_img: String?,
+    @Json(name = "description") val description: String?,
+    @Json(name = "public_description") val public_description: String?,
+    @Json(name = "subscribers") val subscribers: Int?,
+    @Json(name = "label_nsfw") val label_nsfw: Boolean?,
+
+    /** User has unread mail? null if not your account. */
+
+) : RedditObject, Created {
+    override val kind: String = "User"
+}
 @Thing
 internal data class Link(
     @Json(name = "id") override val id: String?,
@@ -361,7 +433,6 @@ internal data class Link(
 ) : RedditObject, Votable, Created {
     override val kind: String = "t3"
 }
-
 /**
  * Just like the constructor of [Link], but initializes non-passed fields as null.
  * And no, `@JvmOverloads` does not work on this class (I tried, in vain).
@@ -639,6 +710,7 @@ internal data class Subreddit(
     @Json(name = "description") val description: String?,
     /** Sidebar text, escaped HTML format. */
     @Json(name = "description_html") val descriptionHtml: String?,
+    @Json(name = "subreddit") val subreddit: String?,
     /** Human name of the subreddit. */
     @Json(name = "display_name") val displayName: String?,
     /** Full URL to the header image, or null. */
