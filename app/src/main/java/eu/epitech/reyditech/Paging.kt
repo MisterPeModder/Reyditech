@@ -83,7 +83,8 @@ internal fun PostsPager(loginViewModel: LoginViewModel): PostsPager =
                         before = before,
                         after = after,
                         count = count,
-                        limit = limit
+                        limit = limit,
+                        subreddit = "gifs"
                     )
                 }
             }

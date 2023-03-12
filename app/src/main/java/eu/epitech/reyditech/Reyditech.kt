@@ -53,6 +53,7 @@ internal fun Reyditech() {
             TopAppBar(
 //                backgroundColor = MaterialTheme.colors.primaryVariant,
                 backgroundColor = Color(0xFF039BE5),
+                modifier = Modifier.height(63.dp),
                 title = {
 
                     Row(
@@ -71,7 +72,7 @@ internal fun Reyditech() {
                         OutlinedTextField(
                             modifier = Modifier/*.height(150.dp)*/
                                 .background(Transparent)
-                                .padding(1.dp)
+                                .padding(bottom = 2.dp)
                                 ,
                             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp),
                             value = searchparam,
