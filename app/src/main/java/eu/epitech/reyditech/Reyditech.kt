@@ -34,7 +34,20 @@ internal fun Reyditech() {
             MainScreen(
                 onReLogin = reLogin,
                 onGoToSubreddit = { name -> navController.navigate("subreddit/$name") },
+                section = BottomSection.MAIN,
                 setSection = navController::navigateToSection,
+                postType = PostType.BEST,
+                subreddit = "all",
+            )
+        }
+        composable("hot") {
+            MainScreen(
+                onReLogin = reLogin,
+                onGoToSubreddit = { name -> navController.navigate("subreddit/$name") },
+                section = BottomSection.HOT,
+                setSection = navController::navigateToSection,
+                postType = PostType.HOT,
+                subreddit = "popular",
             )
         }
         composable("subreddit/{subredditName}") { backStackEntry ->
@@ -49,11 +62,8 @@ internal fun Reyditech() {
 private fun NavHostController.navigateToSection(section: BottomSection) {
     when (section) {
         BottomSection.MAIN -> navigate("main") { popUpTo("main") }
+        BottomSection.HOT -> navigate("hot") { popUpTo("hot") }
         BottomSection.PROFILE -> {
-            /* TODO */
-        }
-
-        BottomSection.HOT -> {
             /* TODO */
         }
     }
