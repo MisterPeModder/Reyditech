@@ -36,7 +36,7 @@ internal fun Reyditech() {
                 onGoToSubreddit = { name -> navController.navigate("subreddit/$name") },
                 section = BottomSection.MAIN,
                 setSection = navController::navigateToSection,
-                postType = PostType.BEST,
+                initialPostType = PostType.BEST,
                 subreddit = "all",
             )
         }
@@ -46,7 +46,7 @@ internal fun Reyditech() {
                 onGoToSubreddit = { name -> navController.navigate("subreddit/$name") },
                 section = BottomSection.HOT,
                 setSection = navController::navigateToSection,
-                postType = PostType.HOT,
+                initialPostType = PostType.HOT,
                 subreddit = "popular",
             )
         }

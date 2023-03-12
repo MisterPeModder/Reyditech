@@ -68,6 +68,7 @@ import eu.epitech.reyditech.SubscribeAction
 import eu.epitech.reyditech.VoteAction
 import eu.epitech.reyditech.components.BottomSection
 import eu.epitech.reyditech.components.PostList
+import eu.epitech.reyditech.components.PostsFilter
 import eu.epitech.reyditech.components.ProfileImage
 import eu.epitech.reyditech.components.ReyditechScaffold
 import eu.epitech.reyditech.components.adjustBrightness
@@ -82,7 +83,8 @@ internal fun SubredditScreen(
     loginViewModel: LoginViewModel = viewModel<AndroidLoginViewModel>(factory = AndroidLoginViewModel.Factory),
 ) {
     val scope = rememberCoroutineScope()
-    val postsPager = PostsPager(loginViewModel, PostType.BEST, subredditName)
+    val (postType, setPostType) = remember { mutableStateOf(PostType.BEST) }
+    val postsPager = PostsPager(loginViewModel, postType, subredditName)
     var subreddit by remember { mutableStateOf<Subreddit?>(null) }
     var subscribing by remember { mutableStateOf<Boolean?>(false) }
 
@@ -112,6 +114,8 @@ internal fun SubredditScreen(
             }
         },
         subscribing = subscribing,
+        postType = postType,
+        setPostType = setPostType,
     )
 }
 
@@ -125,6 +129,8 @@ private fun SubredditScreenUI(
     setSection: (BottomSection) -> Unit,
     onSubscribe: (SubscribeAction, String) -> Unit,
     subscribing: Boolean?,
+    postType: PostType,
+    setPostType: (PostType) -> Unit,
 ) {
     val drawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed)
 
@@ -140,6 +146,7 @@ private fun SubredditScreenUI(
                     subscribing = subscribing,
                     onOpenSubredditInfo = { scope.launch { drawerState.expand() } },
                 )
+                PostsFilter(postType = postType, setPostType = setPostType)
                 PostList(pager = postsPager, onVote = onVote, showSubreddit = false)
             }
         }
