@@ -1,11 +1,7 @@
 package eu.epitech.reyditech.screens
 
 import android.util.Log
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -64,7 +60,7 @@ private fun MainScreenUI(
     onVote: (id: FullName, action: VoteAction) -> Unit,
 ) {
     Theme {
-        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize().padding(bottom = 60.dp, top = 55.dp)) {
+        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize().padding(bottom = 60.dp, top = 65.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(onClick = onLogout) {
                     Icon(
