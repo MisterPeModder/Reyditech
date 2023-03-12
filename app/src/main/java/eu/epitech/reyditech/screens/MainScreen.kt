@@ -39,10 +39,17 @@ internal fun MainScreen(
     loginViewModel: LoginViewModel = viewModel<AndroidLoginViewModel>(factory = AndroidLoginViewModel.Factory),
     onReLogin: () -> Unit = {},
     onGoToSubreddit: (String) -> Unit,
+    section: BottomSection,
     setSection: (BottomSection) -> Unit,
+    postType: PostType,
+    subreddit: String? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val postsPager = PostsPager(loginViewModel, PostType.BEST, "all")
+    val postsPager = if (subreddit == null) {
+        PostsPager(loginViewModel, postType)
+    } else {
+        PostsPager(loginViewModel, postType, subreddit)
+    }
 //    val (searchParam, setSearchParam) = remember { mutableStateOf(TextFieldValue("")) }
 
     MainScreenUI(
@@ -55,6 +62,7 @@ internal fun MainScreen(
         },
         onVote = { id, action -> loginViewModel.performVote(scope, id, action) },
         onGoToSubreddit = onGoToSubreddit,
+        section = section,
         setSection = setSection,
     )
 }
@@ -65,9 +73,10 @@ private fun MainScreenUI(
     onLogout: () -> Unit,
     onVote: (id: FullName, action: VoteAction) -> Unit,
     onGoToSubreddit: (String) -> Unit,
+    section: BottomSection,
     setSection: (BottomSection) -> Unit,
 ) {
-    ReyditechScaffold(section = BottomSection.MAIN, setSection = setSection) {
+    ReyditechScaffold(section = section, setSection = setSection) {
         Box(
             contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()
         ) {
